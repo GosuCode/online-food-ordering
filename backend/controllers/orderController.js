@@ -4,9 +4,16 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// placing user order for frontend
+/**
+ * @desc Place new order, clear user's cart, and initiate Stripe checkout session
+ * @param {object} req - The request object containing order details and user ID.
+ * @param {object} res - The response object to send back the session URL or error.
+ * @returns {object} JSON response with success status and Stripe session URL or an error message.
+ *
+ */
+
 const placeOrder = async (req, res) => {
-  const frontend_url = "https://food-delivery-frontend-s2l9.onrender.com";
+  const frontend_url = "http://localhost:5173"; // frontend client url
   try {
     const newOrder = new orderModel({
       userId: req.body.userId,
@@ -105,7 +112,7 @@ const updateStatus = async (req, res) => {
         status: req.body.status,
       });
       res.json({ success: true, message: "Status Updated Successfully" });
-    }else{
+    } else {
       res.json({ success: false, message: "You are not an admin" });
     }
   } catch (error) {

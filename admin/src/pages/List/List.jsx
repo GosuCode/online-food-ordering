@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./List.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const List = ({ url }) => {
   const navigate = useNavigate();
-  const { token,admin } = useContext(StoreContext);
+  const { token, admin } = useContext(StoreContext);
   const [list, setList] = useState([]);
 
   const fetchList = async () => {
@@ -55,10 +55,15 @@ const List = ({ url }) => {
         {list.map((item, index) => {
           return (
             <div key={index} className="list-table-format">
-              <img src={`${url}/images/` + item.image} alt="" />
+              <img
+                src={`${url}/images/` + item.image}
+                alt=""
+                height={50}
+                width={50}
+              />
               <p>{item.name}</p>
               <p>{item.category}</p>
-              <p>${item.price}</p>
+              <p>Rs. {item.price}</p>
               <p onClick={() => removeFood(item._id)} className="cursor">
                 X
               </p>

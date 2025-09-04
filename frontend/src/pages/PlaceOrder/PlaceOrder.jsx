@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./PlaceOrder.css";
 import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
-  const navigate= useNavigate();
+  const navigate = useNavigate();
 
   const { getTotalCartAmount, token, food_list, cartItems, url } =
     useContext(StoreContext);
@@ -43,26 +43,27 @@ const PlaceOrder = () => {
       items: orderItems,
       amount: getTotalCartAmount() + 2,
     };
-    
-    let response= await axios.post(url+"/api/order/place",orderData,{headers:{token}});
-    if(response.data.success){
-      const {session_url}=response.data;
+
+    let response = await axios.post(url + "/api/order/place", orderData, {
+      headers: { token },
+    });
+    if (response.data.success) {
+      const { session_url } = response.data;
       window.location.replace(session_url);
-    }else{
-      toast.error("Errors!")
+    } else {
+      toast.error("Errors!");
     }
   };
 
-  useEffect(()=>{
-    if(!token){
-      toast.error("Please Login first")
-      navigate("/cart")
-    }
-    else if(getTotalCartAmount()===0){
+  useEffect(() => {
+    if (!token) {
+      toast.error("Please Login first");
+      navigate("/cart");
+    } else if (getTotalCartAmount() === 0) {
       toast.error("Please Add Items to Cart");
-      navigate("/cart")
+      navigate("/cart");
     }
-  },[token])
+  }, [token]);
   return (
     <form className="place-order" onSubmit={placeOrder}>
       <div className="place-order-left">

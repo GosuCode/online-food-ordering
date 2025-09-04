@@ -1,14 +1,15 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import "./Login.css";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { StoreContext } from "../../context/StoreContext";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const Login = ({ url }) => {
-  const navigate=useNavigate();
-  const {admin,setAdmin,token, setToken } = useContext(StoreContext);
+  const navigate = useNavigate();
+  const { admin, setAdmin, token, setToken } = useContext(StoreContext);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -28,19 +29,19 @@ const Login = ({ url }) => {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("admin", true);
         toast.success("Login Successfully");
-        navigate("/add")
-      }else{
+        navigate("/dashboard");
+      } else {
         toast.error("You are not an admin");
       }
     } else {
       toast.error(response.data.message);
     }
   };
-  useEffect(()=>{
-    if(admin && token){
-       navigate("/add");
+  useEffect(() => {
+    if (admin && token) {
+      navigate("/dashboard");
     }
-  },[])
+  }, []);
   return (
     <div className="login-popup">
       <form onSubmit={onLogin} className="login-popup-container">
@@ -72,3 +73,7 @@ const Login = ({ url }) => {
 };
 
 export default Login;
+
+Login.propTypes = {
+  url: PropTypes.string.isRequired,
+};
