@@ -17,7 +17,16 @@ const App = () => {
   const url = "http://localhost:4000";
   return (
     <>
-      <ToastContainer />
+      <ToastContainer
+        autoClose={1000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Routes>
         {/* Login route - standalone page without layout */}
         <Route path="/" element={<Login url={url} />} />

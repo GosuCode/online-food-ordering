@@ -1,7 +1,20 @@
 import "./ExploreMenu.css";
 import { menu_list } from "../../assets/frontend_assets/assets";
+import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 const ExploreMenu = ({ category, setCategory }) => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (item) => {
+    setCategory((prev) => (prev === item.menu_name ? "All" : item.menu_name));
+
+    navigate("/menu", {
+      state: {
+        category: item.menu_name === category ? "All" : item.menu_name,
+      },
+    });
+  };
   return (
     <div className="explore-menu" id="explore-menu">
       <h1>Explore our menu</h1>
@@ -14,11 +27,7 @@ const ExploreMenu = ({ category, setCategory }) => {
         {menu_list.map((item, index) => {
           return (
             <div
-              onClick={() =>
-                setCategory((prev) =>
-                  prev === item.menu_image.name ? "All" : item.menu_name
-                )
-              }
+              onClick={() => handleCategoryClick(item)}
               key={index}
               className="explore-menu-list-item"
             >
@@ -38,3 +47,8 @@ const ExploreMenu = ({ category, setCategory }) => {
 };
 
 export default ExploreMenu;
+
+ExploreMenu.propTypes = {
+  category: PropTypes.string.isRequired,
+  setCategory: PropTypes.func.isRequired,
+};

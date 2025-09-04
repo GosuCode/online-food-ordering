@@ -14,13 +14,24 @@
     font-weight: 600;
     margin-bottom: 50px;
 }
-.place-order-left input{
+.place-order-left input,
+.place-order-left select{
     margin-bottom: 15px;
     width: 100%;
     padding: 10px;
     border: 1px solid #c5c5c5;
     border-radius: 4px;
     outline-color: tomato;
+}
+
+.state-select {
+    background-color: white;
+    cursor: pointer;
+}
+
+.state-select:focus {
+    border-color: tomato;
+    box-shadow: 0 0 0 2px rgba(255, 99, 71, 0.2);
 }
 .place-order-left .multi-fields{
     display: flex;
