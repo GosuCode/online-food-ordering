@@ -121,4 +121,34 @@ const updateStatus = async (req, res) => {
   }
 };
 
-export { placeOrder, verifyOrder, userOrders, listOrders, updateStatus };
+// api for deleting order
+const deleteOrder = async (req, res) => {
+  try {
+    let userData = await userModel.findById(req.body.userId);
+    if (userData && userData.role === "admin") {
+      const orderId = req.params.orderId;
+      const order = await orderModel.findById(orderId);
+
+      if (!order) {
+        return res.json({ success: false, message: "Order not found" });
+      }
+
+      await orderModel.findByIdAndDelete(orderId);
+      res.json({ success: true, message: "Order deleted successfully" });
+    } else {
+      res.json({ success: false, message: "You are not an admin" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error deleting order" });
+  }
+};
+
+export {
+  placeOrder,
+  verifyOrder,
+  userOrders,
+  listOrders,
+  updateStatus,
+  deleteOrder,
+};

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import PropTypes from "prop-types";
 
 export const StoreContext = createContext(null);
 
@@ -104,3 +105,7 @@ const StoreContextProvider = (props) => {
   );
 };
 export default StoreContextProvider;
+
+StoreContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
