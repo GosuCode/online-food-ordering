@@ -10,7 +10,8 @@
     "migrate-ratings": "node scripts/migrateRatings.js",
     "check-orders": "node scripts/checkOrders.js",
     "test-pricing": "node scripts/testPricing.js",
-    "test-discount-logging": "node scripts/testDiscountLogging.js"
+    "test-discount-logging": "node scripts/testDiscountLogging.js",
+    "test-forecast": "node scripts/testForecast.js"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +27,8 @@
     "nodemon": "^3.1.4",
     "stripe": "^16.6.0",
     "validator": "^13.12.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "simple-statistics": "^7.8.3",
+    "moment": "^2.29.4"
   }
 }

@@ -8,6 +8,7 @@ import Orders from "./pages/Orders/Orders";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Analytics from "./pages/Analytics/Analytics";
 import Pricing from "./pages/Pricing/Pricing";
+import Forecast from "./pages/Forecast/Forecast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./components/Login/Login";
@@ -63,6 +64,7 @@ const App = () => {
                       <Route path="/list" element={<List url={url} />} />
                       <Route path="/orders" element={<Orders url={url} />} />
                       <Route path="/pricing" element={<Pricing />} />
+                      <Route path="/forecast" element={<Forecast />} />
                     </Routes>
                   </Content>
                 </Layout>

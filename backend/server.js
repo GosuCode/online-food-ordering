@@ -8,6 +8,8 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import demandService from "./services/demandService.js";
 import pricingService from "./services/pricingService.js";
+import forecastService from "./services/forecastService.js";
+import forecastRouter from "./routes/forecastRoute.js";
 
 // app config
 const app = express();
@@ -33,6 +35,7 @@ connectDB();
 // Initialize services
 demandService.initialize();
 pricingService.initializeDefaultRules();
+forecastService.initialize();
 
 // api endpoints
 app.use("/api/food", foodRouter);
@@ -40,6 +43,7 @@ app.use("/images", express.static("uploads"));
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/forecast", forecastRouter);
 
 app.get("/", (req, res) => {
   res.send("API Working");

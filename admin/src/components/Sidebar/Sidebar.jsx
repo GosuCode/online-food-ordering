@@ -7,6 +7,7 @@ import {
   ShoppingCartOutlined,
   AppstoreAddOutlined,
   DollarOutlined,
+  LineChartOutlined,
 } from "@ant-design/icons";
 
 const { Sider } = Layout;
@@ -52,6 +53,12 @@ const Sidebar = () => {
       icon: <DollarOutlined />,
       label: "Pricing",
       onClick: () => navigate("/pricing"),
+    },
+    {
+      key: "forecast",
+      icon: <LineChartOutlined />,
+      label: "Forecast",
+      onClick: () => navigate("/forecast"),
     },
   ];
 
