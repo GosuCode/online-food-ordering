@@ -3,6 +3,7 @@ import "./Home.css";
 import Header from "../../components/Header/Header";
 import ExploreMenu from "../../components/ExploreMenu/ExploreMenu";
 import FoodDisplay from "../../components/FoodDisplay/FoodDisplay";
+import Recommendations from "../../components/Recommendations/Recommendations";
 import { Link } from "react-router-dom";
 
 const Home = () => {
@@ -10,6 +11,7 @@ const Home = () => {
   return (
     <div>
       <Header />
+      <Recommendations />
       <ExploreMenu category={category} setCategory={setCategory} />
       <FoodDisplay category={category} />
 

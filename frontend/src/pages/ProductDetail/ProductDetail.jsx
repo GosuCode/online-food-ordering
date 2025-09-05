@@ -5,15 +5,17 @@ import { StoreContext } from "../../context/StoreContext";
 import { assets } from "../../assets/frontend_assets/assets";
 import { toast } from "react-toastify";
 import axios from "axios";
+import FoodItem from "../../components/FoodItem/FoodItem";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, removeFromCart, cartItems, url } =
+  const { addToCart, removeFromCart, cartItems, url, userData, token } =
     useContext(StoreContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -34,10 +36,32 @@ const ProductDetail = () => {
       }
     };
 
+    const fetchRecommendations = async () => {
+      if (!token || !userData) return;
+
+      try {
+        const response = await axios.get(
+          `${url}/api/food/recommendations/${userData._id}`,
+          { headers: { token } }
+        );
+
+        if (response.data.success) {
+          // Filter out the current product from recommendations
+          const filteredRecommendations = response.data.data
+            .filter((item) => item._id !== id)
+            .slice(0, 4);
+          setRecommendations(filteredRecommendations);
+        }
+      } catch (error) {
+        console.log("Error fetching recommendations:", error);
+      }
+    };
+
     if (id) {
       fetchProduct();
+      fetchRecommendations();
     }
-  }, [id, url, navigate]);
+  }, [id, url, navigate, token, userData]);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -169,6 +193,27 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Recommendations Section */}
+      {recommendations.length > 0 && (
+        <div className="product-recommendations">
+          <h3>You might also like</h3>
+          <div className="recommendations-grid">
+            {recommendations.map((item, index) => (
+              <FoodItem
+                key={index}
+                id={item._id}
+                name={item.name}
+                description={item.description}
+                price={item.price}
+                image={item.image}
+                averageRating={item.averageRating}
+                totalRatings={item.totalRatings}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="product-detail-footer">
         <button onClick={() => navigate("/menu")} className="back-to-menu-btn">
