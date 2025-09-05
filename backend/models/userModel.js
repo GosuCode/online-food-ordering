@@ -51,6 +51,15 @@ const userSchema = new mongoose.Schema(
     },
     role: { type: String, default: "user" },
     cartData: { type: Object, default: {} },
+    // Loyalty tracking fields
+    orderCount: { type: Number, default: 0 },
+    totalSpent: { type: Number, default: 0 },
+    isNewUser: { type: Boolean, default: true },
+    loyaltyTier: {
+      type: String,
+      enum: ["bronze", "silver", "gold", "platinum"],
+      default: "bronze",
+    },
   },
   { minimize: false },
   { timestamps: true }

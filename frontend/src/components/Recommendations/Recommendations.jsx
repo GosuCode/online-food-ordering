@@ -66,6 +66,9 @@ const Recommendations = () => {
             name={item.name}
             description={item.description}
             price={item.price}
+            originalPrice={item.originalPrice}
+            discount={item.discount}
+            appliedRule={item.appliedRule}
             image={item.image}
             averageRating={item.averageRating}
             totalRatings={item.totalRatings}

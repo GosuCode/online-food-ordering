@@ -77,8 +77,8 @@
 
 .product-price {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  flex-direction: column;
+  gap: 15px;
   margin: 10px 0;
 }
 
@@ -91,6 +91,61 @@
 .price-label {
   font-size: 1rem;
   color: #7f8c8d;
+}
+
+.price-with-discount {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+}
+
+.current-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e74c3c;
+}
+
+.original-price {
+  font-size: 1.2rem;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.discount-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.discount-badge {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.discount-amount {
+  background: linear-gradient(135deg, #28a745, #34ce57);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .product-description h3 {

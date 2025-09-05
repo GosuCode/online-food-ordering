@@ -1,6 +1,7 @@
 import foodModel from "../models/foodModel.js";
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
+import pricingService from "../services/pricingService.js";
 import fs from "fs";
 
 // add food items
@@ -28,23 +29,70 @@ const addFood = async (req, res) => {
   }
 };
 
-// all foods
+// all foods with dynamic pricing
 const listFood = async (req, res) => {
   try {
     const foods = await foodModel.find({});
-    res.json({ success: true, data: foods });
+    const userId = req.query.userId;
+    const userCity = req.query.city || "Kathmandu"; // Default city
+
+    if (userId) {
+      // Apply dynamic pricing for authenticated users
+      const foodsWithPricing = await Promise.all(
+        foods.map(async (food) => {
+          const pricing = await pricingService.calculateDynamicPrice(
+            food,
+            userId,
+            userCity
+          );
+          return {
+            ...food.toObject(),
+            originalPrice: pricing.originalPrice,
+            price: pricing.finalPrice,
+            discount: pricing.discount,
+            appliedRule: pricing.appliedRule,
+            discountType: pricing.discountType,
+          };
+        })
+      );
+      res.json({ success: true, data: foodsWithPricing });
+    } else {
+      // Return original prices for non-authenticated users
+      res.json({ success: true, data: foods });
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });
   }
 };
 
-// get single food item
+// get single food item with dynamic pricing
 const getFoodById = async (req, res) => {
   try {
     const food = await foodModel.findById(req.params.id);
     if (food) {
-      res.json({ success: true, data: food });
+      const userId = req.query.userId;
+      const userCity = req.query.city || "Kathmandu";
+
+      if (userId) {
+        // Apply dynamic pricing for authenticated users
+        const pricing = await pricingService.calculateDynamicPrice(
+          food,
+          userId,
+          userCity
+        );
+        const foodWithPricing = {
+          ...food.toObject(),
+          originalPrice: pricing.originalPrice,
+          price: pricing.finalPrice,
+          discount: pricing.discount,
+          appliedRule: pricing.appliedRule,
+          discountType: pricing.discountType,
+        };
+        res.json({ success: true, data: foodWithPricing });
+      } else {
+        res.json({ success: true, data: food });
+      }
     } else {
       res.json({ success: false, message: "Food item not found" });
     }
@@ -247,4 +295,114 @@ const generateRecommendations = (
     .slice(0, 10);
 };
 
-export { addFood, listFood, getFoodById, removeFood, getRecommendations };
+// get pricing rules (admin only)
+const getPricingRules = async (req, res) => {
+  try {
+    const userData = await userModel.findById(req.body.userId);
+    if (userData && userData.role === "admin") {
+      const rules = await pricingService.getPricingRules();
+      res.json({ success: true, data: rules });
+    } else {
+      res.json({ success: false, message: "You are not admin" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+// update pricing rule (admin only)
+const updatePricingRule = async (req, res) => {
+  try {
+    const userData = await userModel.findById(req.body.userId);
+    if (userData && userData.role === "admin") {
+      const rule = await pricingService.updatePricingRule(
+        req.params.ruleId,
+        req.body
+      );
+      res.json({ success: true, data: rule });
+    } else {
+      res.json({ success: false, message: "You are not admin" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+// create pricing rule (admin only)
+const createPricingRule = async (req, res) => {
+  try {
+    const userData = await userModel.findById(req.body.userId);
+    if (userData && userData.role === "admin") {
+      const rule = await pricingService.createPricingRule(req.body);
+      res.json({ success: true, data: rule });
+    } else {
+      res.json({ success: false, message: "You are not admin" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+// Test endpoint to verify pricing
+const testPricing = async (req, res) => {
+  try {
+    const { userId, foodId } = req.query;
+
+    if (!userId || !foodId) {
+      return res.json({
+        success: false,
+        message: "userId and foodId required",
+      });
+    }
+
+    const food = await foodModel.findById(foodId);
+    const user = await userModel.findById(userId);
+
+    if (!food) {
+      return res.json({ success: false, message: "Food not found" });
+    }
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    console.log("🧪 TEST PRICING:");
+    console.log("   Food:", food.name, "Price:", food.price);
+    console.log("   User:", user.name, "City:", user.city);
+
+    const pricing = await pricingService.calculateDynamicPrice(
+      food,
+      userId,
+      user.city || "Kathmandu"
+    );
+
+    console.log("   Pricing result:", pricing);
+
+    res.json({
+      success: true,
+      data: {
+        food: food,
+        user: user,
+        pricing: pricing,
+      },
+    });
+  } catch (error) {
+    console.error("Test pricing error:", error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+export {
+  addFood,
+  listFood,
+  getFoodById,
+  removeFood,
+  getRecommendations,
+  getPricingRules,
+  updatePricingRule,
+  createPricingRule,
+  testPricing,
+};

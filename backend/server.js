@@ -6,6 +6,8 @@ import userRouter from "./routes/userRoute.js";
 import "dotenv/config";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import demandService from "./services/demandService.js";
+import pricingService from "./services/pricingService.js";
 
 // app config
 const app = express();
@@ -27,6 +29,10 @@ app.use(
 
 // DB connection
 connectDB();
+
+// Initialize services
+demandService.initialize();
+pricingService.initializeDefaultRules();
 
 // api endpoints
 app.use("/api/food", foodRouter);

@@ -8,7 +8,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "migrate-ratings": "node scripts/migrateRatings.js",
-    "check-orders": "node scripts/checkOrders.js"
+    "check-orders": "node scripts/checkOrders.js",
+    "test-pricing": "node scripts/testPricing.js",
+    "test-discount-logging": "node scripts/testDiscountLogging.js"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +25,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.4",
     "stripe": "^16.6.0",
-    "validator": "^13.12.0"
+    "validator": "^13.12.0",
+    "node-fetch": "^3.3.2"
   }
 }

@@ -20,7 +20,18 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`${url}/api/food/${id}`);
+        let apiUrl = `${url}/api/food/${id}`;
+
+        // Add user ID and city to the request if user is logged in
+        if (token && userData) {
+          const params = new URLSearchParams({
+            userId: userData._id,
+            city: userData.city || "Kathmandu",
+          });
+          apiUrl += `?${params.toString()}`;
+        }
+
+        const response = await axios.get(apiUrl);
         if (response.data.success) {
           setProduct(response.data.data);
         } else {
@@ -62,6 +73,34 @@ const ProductDetail = () => {
       fetchRecommendations();
     }
   }, [id, url, navigate, token, userData]);
+
+  // Refetch product when user data changes to apply dynamic pricing
+  useEffect(() => {
+    if (id && userData) {
+      const fetchProductWithPricing = async () => {
+        try {
+          let apiUrl = `${url}/api/food/${id}`;
+
+          if (token && userData) {
+            const params = new URLSearchParams({
+              userId: userData._id,
+              city: userData.city || "Kathmandu",
+            });
+            apiUrl += `?${params.toString()}`;
+          }
+
+          const response = await axios.get(apiUrl);
+          if (response.data.success) {
+            setProduct(response.data.data);
+          }
+        } catch (error) {
+          console.log("Error refetching product with pricing:", error);
+        }
+      };
+
+      fetchProductWithPricing();
+    }
+  }, [userData]);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -129,8 +168,33 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-price">
-              <span className="price">Rs. {product.price}</span>
-              <span className="price-label">per serving</span>
+              {product.discount > 0 &&
+              product.originalPrice &&
+              product.price ? (
+                <div className="price-with-discount">
+                  <div className="price-info">
+                    <span className="current-price">Rs. {product.price}</span>
+                    <span className="original-price">
+                      Rs. {product.originalPrice}
+                    </span>
+                  </div>
+                  <div className="discount-info">
+                    <span className="discount-badge">
+                      -{product.discount}% OFF
+                    </span>
+                    <span className="discount-amount">
+                      Save Rs.{" "}
+                      {(product.originalPrice - product.price).toFixed(2)}
+                    </span>
+                  </div>
+                  <span className="price-label">per serving</span>
+                </div>
+              ) : (
+                <div>
+                  <span className="price">Rs. {product.price || 0}</span>
+                  <span className="price-label">per serving</span>
+                </div>
+              )}
             </div>
 
             <div className="product-description">
@@ -206,6 +270,9 @@ const ProductDetail = () => {
                 name={item.name}
                 description={item.description}
                 price={item.price}
+                originalPrice={item.originalPrice}
+                discount={item.discount}
+                appliedRule={item.appliedRule}
                 image={item.image}
                 averageRating={item.averageRating}
                 totalRatings={item.totalRatings}

@@ -9,6 +9,9 @@ const FoodItem = ({
   id,
   name,
   price,
+  originalPrice,
+  discount,
+  appliedRule,
   description,
   image,
   averageRating,
@@ -77,7 +80,23 @@ const FoodItem = ({
           </div>
         </div>
         <p className="food-item-desc">{description}</p>
-        <p className="food-item-price">Rs. {price}</p>
+        <div className="food-item-pricing">
+          {discount > 0 && originalPrice && price ? (
+            <div className="price-with-discount">
+              <p className="food-item-price">Rs. {price}</p>
+              <p className="food-item-original-price">Rs. {originalPrice}</p>
+              <div className="discount-info">
+                <span className="discount-badge">-{discount}%</span>
+                <span className="discount-amount">
+                  Save Rs. {(originalPrice - price).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="food-item-price">Rs. {price || 0}</p>
+          )}
+          {appliedRule && <p className="discount-reason">{appliedRule}</p>}
+        </div>
       </div>
     </div>
   );
@@ -89,6 +108,9 @@ FoodItem.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
+  originalPrice: PropTypes.number,
+  discount: PropTypes.number,
+  appliedRule: PropTypes.string,
   description: PropTypes.string.isRequired,
   image: PropTypes.string.isRequired,
   averageRating: PropTypes.number,

@@ -53,18 +53,56 @@ const StoreContextProvider = (props) => {
     for (const item in cartItems) {
       if (cartItems[item] > 0) {
         let itemInfo = food_list.find((product) => product._id === item);
-        totalAmount += itemInfo.price * cartItems[item];
+        if (itemInfo && itemInfo.price) {
+          totalAmount += itemInfo.price * cartItems[item];
+        }
       }
     }
     return totalAmount;
   };
 
   const fetchFoodList = async () => {
-    const response = await axios.get(url + "/api/food/list");
-    if (response.data.success) {
-      setFoodList(response.data.data);
-    } else {
-      alert("Error! Products are not fetching..");
+    try {
+      let apiUrl = url + "/api/food/list";
+
+      // Add user ID and city to the request if user is logged in
+      if (token && userData) {
+        const params = new URLSearchParams({
+          userId: userData._id,
+          city: userData.city || "Kathmandu",
+        });
+        apiUrl += `?${params.toString()}`;
+      }
+
+      const response = await axios.get(apiUrl);
+      if (response.data.success && response.data.data) {
+        // Console log discount information for each food item
+        console.log("\n🛒 FOOD LIST WITH DISCOUNTS:");
+        response.data.data.forEach((item, index) => {
+          if (item.discount > 0) {
+            console.log(`\n${index + 1}. ${item.name}:`);
+            console.log(`   Original Price: Rs. ${item.originalPrice}`);
+            console.log(`   Discounted Price: Rs. ${item.price}`);
+            console.log(`   Discount: ${item.discount}%`);
+            console.log(`   Applied Rule: ${item.appliedRule}`);
+            console.log(
+              `   Savings: Rs. ${(item.originalPrice - item.price).toFixed(2)}`
+            );
+          } else {
+            console.log(
+              `\n${index + 1}. ${item.name}: Rs. ${item.price} (No discount)`
+            );
+          }
+        });
+
+        setFoodList(response.data.data);
+      } else {
+        console.error("Error fetching food list:", response.data);
+        setFoodList([]); // Set empty array as fallback
+      }
+    } catch (error) {
+      console.error("Error fetching food list:", error);
+      setFoodList([]); // Set empty array as fallback
     }
   };
 
@@ -96,16 +134,28 @@ const StoreContextProvider = (props) => {
 
   useEffect(() => {
     async function loadData() {
-      await fetchFoodList();
       if (localStorage.getItem("token")) {
         const token = localStorage.getItem("token");
         setToken(token);
         await loadCardData(token);
         await fetchUserData(token);
+        // Fetch food list after user data is loaded
+        await fetchFoodList();
+      } else {
+        // If no token, fetch food list without user data
+        await fetchFoodList();
       }
     }
     loadData();
   }, []);
+
+  // Refetch food list when user data changes to apply dynamic pricing
+  useEffect(() => {
+    if (userData) {
+      console.log("🔄 User data changed, refetching food list with pricing");
+      fetchFoodList();
+    }
+  }, [userData]);
 
   const contextValue = {
     food_list,

@@ -6,6 +6,7 @@ import {
   UnorderedListOutlined,
   ShoppingCartOutlined,
   AppstoreAddOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 
 const { Sider } = Layout;
@@ -46,6 +47,12 @@ const Sidebar = () => {
       label: "Orders",
       onClick: () => navigate("/orders"),
     },
+    {
+      key: "pricing",
+      icon: <DollarOutlined />,
+      label: "Pricing",
+      onClick: () => navigate("/pricing"),
+    },
   ];
 
   // Get current selected key based on pathname
@@ -56,6 +63,7 @@ const Sidebar = () => {
     if (path.includes("/add")) return "add";
     if (path.includes("/list")) return "list";
     if (path.includes("/orders")) return "orders";
+    if (path.includes("/pricing")) return "pricing";
     return "dashboard";
   };
 

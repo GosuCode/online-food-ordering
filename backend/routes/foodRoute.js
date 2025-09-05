@@ -5,6 +5,10 @@ import {
   getFoodById,
   removeFood,
   getRecommendations,
+  getPricingRules,
+  updatePricingRule,
+  createPricingRule,
+  testPricing,
 } from "../controllers/foodController.js";
 import multer from "multer";
 import authMiddleware from "../middleware/auth.js";
@@ -27,5 +31,13 @@ foodRouter.get("/list", listFood);
 foodRouter.get("/recommendations/:userId", authMiddleware, getRecommendations);
 foodRouter.get("/:id", getFoodById);
 foodRouter.post("/remove", authMiddleware, removeFood);
+
+// Pricing management routes (admin only)
+foodRouter.get("/pricing/rules", authMiddleware, getPricingRules);
+foodRouter.put("/pricing/rules/:ruleId", authMiddleware, updatePricingRule);
+foodRouter.post("/pricing/rules", authMiddleware, createPricingRule);
+
+// Test pricing endpoint
+foodRouter.get("/test-pricing", testPricing);
 
 export default foodRouter;
