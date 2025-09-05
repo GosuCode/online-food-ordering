@@ -12,6 +12,7 @@ import Verify from "./pages/Verify/Verify";
 import MyOrders from "./pages/MyOrders/MyOrders";
 import Menu from "./pages/Menu/Menu";
 import AboutUs from "./pages/AboutUs/AboutUs";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -33,6 +34,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/order" element={<PlaceOrder />} />

@@ -10,6 +10,7 @@ const StoreContextProvider = (props) => {
   const url = "http://localhost:4000";
   const [token, setToken] = useState("");
   const [food_list, setFoodList] = useState([]);
+  const [userData, setUserData] = useState(null);
 
   const addToCart = async (itemId) => {
     if (!cartItems[itemId]) {
@@ -76,12 +77,31 @@ const StoreContextProvider = (props) => {
     setCartItems(response.data.cartData);
   };
 
+  const fetchUserData = async (token) => {
+    try {
+      const response = await axios.post(
+        url + "/api/user/userData",
+        {},
+        {
+          headers: { token },
+        }
+      );
+      if (response.data.success) {
+        setUserData(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error fetching user data:", error);
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       await fetchFoodList();
       if (localStorage.getItem("token")) {
-        setToken(localStorage.getItem("token"));
-        await loadCardData(localStorage.getItem("token"));
+        const token = localStorage.getItem("token");
+        setToken(token);
+        await loadCardData(token);
+        await fetchUserData(token);
       }
     }
     loadData();
@@ -97,6 +117,7 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
+    userData,
   };
   return (
     <StoreContext.Provider value={contextValue}>

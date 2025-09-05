@@ -21,7 +21,6 @@ import {
   EditOutlined,
   EyeOutlined,
   AppstoreOutlined,
-  DollarOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
@@ -265,10 +264,9 @@ const List = ({ url }) => {
               <Statistic
                 title="Total Value"
                 value={totalValue}
-                prefix={<DollarOutlined />}
                 precision={2}
                 valueStyle={{ color: "#52c41a" }}
-                suffix="Rs."
+                prefix="Rs."
               />
             </Card>
           </Col>

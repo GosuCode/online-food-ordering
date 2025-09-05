@@ -58,10 +58,8 @@ const Orders = ({ url }) => {
       } else {
         message.error("Failed to fetch orders");
       }
-      console.log(response.data);
     } catch (error) {
       message.error("Error fetching orders");
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -109,7 +107,6 @@ const Orders = ({ url }) => {
       }
     } catch (error) {
       message.error("Error updating order status");
-      console.error(error);
     } finally {
       setUpdateLoading((prev) => ({ ...prev, [orderId]: false }));
     }
@@ -132,7 +129,6 @@ const Orders = ({ url }) => {
       }
     } catch (error) {
       message.error("Error deleting order");
-      console.error(error);
     } finally {
       setUpdateLoading((prev) => ({ ...prev, [orderId]: false }));
     }
@@ -166,9 +162,7 @@ const Orders = ({ url }) => {
         <Space direction="vertical" size="small">
           <Space>
             <Avatar size="small" icon={<UserOutlined />} />
-            <Text strong>
-              {record.address.firstName} {record.address.lastName}
-            </Text>
+            <Text strong>{record.address.name}</Text>
           </Space>
           <Space>
             <PhoneOutlined style={{ color: "#8c8c8c" }} />

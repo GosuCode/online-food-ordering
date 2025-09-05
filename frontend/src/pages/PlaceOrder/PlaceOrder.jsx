@@ -161,6 +161,10 @@ const PlaceOrder = () => {
         ...prevData,
         name: userData.name || "",
         email: userData.email || "",
+        city: userData.city || "",
+        street: userData.street || "",
+        state: userData.state || "",
+        phone: userData.phone || "",
       }));
     }
   }, [userData]);

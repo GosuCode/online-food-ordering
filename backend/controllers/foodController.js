@@ -38,6 +38,21 @@ const listFood = async (req, res) => {
   }
 };
 
+// get single food item
+const getFoodById = async (req, res) => {
+  try {
+    const food = await foodModel.findById(req.params.id);
+    if (food) {
+      res.json({ success: true, data: food });
+    } else {
+      res.json({ success: false, message: "Food item not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
 // remove food item
 const removeFood = async (req, res) => {
   try {
@@ -56,4 +71,4 @@ const removeFood = async (req, res) => {
   }
 };
 
-export { addFood, listFood, removeFood };
+export { addFood, listFood, getFoodById, removeFood };

@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import "./FoodItem.css";
 import { assets } from "../../assets/frontend_assets/assets";
 import { StoreContext } from "../../context/StoreContext";
@@ -7,9 +8,17 @@ import PropTypes from "prop-types";
 const FoodItem = ({ id, name, price, description, image }) => {
   const { cartItems, addToCart, removeFromCart, url } =
     useContext(StoreContext);
+  const navigate = useNavigate();
+
+  const handleProductClick = (e) => {
+    if (e.target.closest(".add") || e.target.closest(".food-item-counter")) {
+      return;
+    }
+    navigate(`/product/${id}`);
+  };
 
   return (
-    <div className="food-item">
+    <div className="food-item" onClick={handleProductClick}>
       <div className="food-item-img-container">
         <img
           src={url + "/images/" + image}
@@ -19,20 +28,29 @@ const FoodItem = ({ id, name, price, description, image }) => {
         {!cartItems[id] ? (
           <img
             className="add"
-            onClick={() => addToCart(id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(id);
+            }}
             src={assets.add_icon_white}
             alt=""
           />
         ) : (
           <div className="food-item-counter">
             <img
-              onClick={() => removeFromCart(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFromCart(id);
+              }}
               src={assets.remove_icon_red}
               alt=""
             />
             <p>{cartItems[id]}</p>
             <img
-              onClick={() => addToCart(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                addToCart(id);
+              }}
               src={assets.add_icon_green}
               alt=""
             />
@@ -45,7 +63,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
           <img src={assets.rating_starts} alt="" />
         </div>
         <p className="food-item-desc">{description}</p>
-        <p className="food-item-price">${price}</p>
+        <p className="food-item-price">Rs. {price}</p>
       </div>
     </div>
   );
