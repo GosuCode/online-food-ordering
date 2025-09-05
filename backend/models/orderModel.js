@@ -9,6 +9,17 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, default: "Food Processing" },
     date: { type: Date, default: Date.now() },
     payment: { type: Boolean, default: false },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: null,
+    },
+    review: {
+      type: String,
+      maxlength: 500,
+      default: null,
+    },
   },
   { timestamps: true }
 );

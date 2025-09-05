@@ -50,9 +50,22 @@
     line-height: 1.2;
 }
 
-.food-item-name-rating img {
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rating-display img {
     width: 80px;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.rating-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ff6b6b;
+    margin-left: 5px;
 }
 
 .food-item-desc {

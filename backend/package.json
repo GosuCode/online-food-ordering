@@ -5,7 +5,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate-ratings": "node scripts/migrateRatings.js",
+    "check-orders": "node scripts/checkOrders.js"
   },
   "author": "",
   "license": "ISC",

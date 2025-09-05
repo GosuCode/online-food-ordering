@@ -1,5 +1,6 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import foodModel from "../models/foodModel.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -144,6 +145,55 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+// submit rating and review for order
+const submitRating = async (req, res) => {
+  try {
+    const { orderId, rating, review } = req.body;
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.json({
+        success: false,
+        message: "Rating must be between 1 and 5",
+      });
+    }
+
+    // Update order with rating and review
+    const order = await orderModel.findByIdAndUpdate(
+      orderId,
+      { rating, review },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.json({ success: false, message: "Order not found" });
+    }
+
+    // Update food item ratings
+    for (const item of order.items) {
+      const food = await foodModel.findById(item._id);
+      if (food) {
+        // Add rating for each quantity of the item
+        const quantity = item.quantity || 1;
+        const newTotalRatings = food.totalRatings + quantity;
+        const newAverageRating =
+          (food.averageRating * food.totalRatings + rating * quantity) /
+          newTotalRatings;
+
+        await foodModel.findByIdAndUpdate(item._id, {
+          averageRating: Math.round(newAverageRating * 10) / 10, // Round to 1 decimal
+          totalRatings: newTotalRatings,
+        });
+      }
+    }
+
+    res.json({ success: true, message: "Rating submitted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error submitting rating" });
+  }
+};
+
 export {
   placeOrder,
   verifyOrder,
@@ -151,4 +201,5 @@ export {
   listOrders,
   updateStatus,
   deleteOrder,
+  submitRating,
 };

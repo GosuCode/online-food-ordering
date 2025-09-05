@@ -5,7 +5,15 @@ import { assets } from "../../assets/frontend_assets/assets";
 import { StoreContext } from "../../context/StoreContext";
 import PropTypes from "prop-types";
 
-const FoodItem = ({ id, name, price, description, image }) => {
+const FoodItem = ({
+  id,
+  name,
+  price,
+  description,
+  image,
+  averageRating,
+  totalRatings,
+}) => {
   const { cartItems, addToCart, removeFromCart, url } =
     useContext(StoreContext);
   const navigate = useNavigate();
@@ -60,7 +68,13 @@ const FoodItem = ({ id, name, price, description, image }) => {
       <div className="food-item-info">
         <div className="food-item-name-rating">
           <p>{name}</p>
-          <img src={assets.rating_starts} alt="" />
+          <div className="rating-display">
+            <img src={assets.rating_starts} alt="" />
+            <span className="rating-text">
+              {averageRating ? averageRating.toFixed(1) : "4.8"}
+              {totalRatings && ` (${totalRatings})`}
+            </span>
+          </div>
         </div>
         <p className="food-item-desc">{description}</p>
         <p className="food-item-price">Rs. {price}</p>
@@ -77,4 +91,6 @@ FoodItem.propTypes = {
   price: PropTypes.number.isRequired,
   description: PropTypes.string.isRequired,
   image: PropTypes.string.isRequired,
+  averageRating: PropTypes.number,
+  totalRatings: PropTypes.number,
 };

@@ -20,7 +20,6 @@ const Navbar = ({ setShowLogin }) => {
   return (
     <div className="navbar">
       <Link to="/">
-        {/* <img src={assets.logo} alt="" className="logo" /> */}
         <h1 style={{ color: "#ff1e01" }}>QuickBite</h1>
       </Link>
       <ul className="navbar-menu">
@@ -38,6 +37,15 @@ const Navbar = ({ setShowLogin }) => {
         >
           Menu
         </Link>
+        {token && (
+          <Link
+            to="/myorders"
+            onClick={() => setMenu("myorders")}
+            className={menu === "myorders" ? "active" : ""}
+          >
+            My Orders
+          </Link>
+        )}
         <Link
           to="/about-us"
           onClick={() => setMenu("mobile-app")}
@@ -63,20 +71,7 @@ const Navbar = ({ setShowLogin }) => {
         {!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>
         ) : (
-          <div className="navbar-profile">
-            <img src={assets.profile_icon} alt="" />
-            <ul className="nav-profile-dropdown">
-              <li onClick={() => navigate("/myorders")}>
-                <img src={assets.bag_icon} alt="" />
-                <p>Orders</p>
-              </li>
-              <hr />
-              <li onClick={logout}>
-                <img src={assets.logout_icon} alt="" />
-                <p>Logout</p>
-              </li>
-            </ul>
-          </div>
+          <button onClick={() => logout()}>sign Out</button>
         )}
       </div>
     </div>

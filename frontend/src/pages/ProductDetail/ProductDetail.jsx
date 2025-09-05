@@ -73,6 +73,8 @@ const ProductDetail = () => {
     );
   }
 
+  console.log(product.averageRating, product.totalRatings);
+
   return (
     <div className="product-detail">
       <div className="product-detail-container">
@@ -92,7 +94,14 @@ const ProductDetail = () => {
 
             <div className="product-rating">
               <img src={assets.rating_starts} alt="Rating" />
-              <span>4.8 (120 reviews)</span>
+              <span>
+                {product.averageRating
+                  ? product.averageRating.toFixed(1)
+                  : "4.8"}
+                {product.totalRatings
+                  ? ` (${product.totalRatings} reviews)`
+                  : " (120 reviews)"}
+              </span>
             </div>
 
             <div className="product-price">

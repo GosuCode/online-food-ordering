@@ -7,6 +7,16 @@ const foodSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     image: { type: String, required: true },
     category: { type: String, required: true },
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    totalRatings: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

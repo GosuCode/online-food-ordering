@@ -7,6 +7,7 @@ import {
   userOrders,
   verifyOrder,
   deleteOrder,
+  submitRating,
 } from "../controllers/orderController.js";
 
 const orderRouter = express.Router();
@@ -15,6 +16,7 @@ orderRouter.post("/place", authMiddleware, placeOrder);
 orderRouter.post("/verify", verifyOrder);
 orderRouter.post("/status", authMiddleware, updateStatus);
 orderRouter.post("/userorders", authMiddleware, userOrders);
+orderRouter.post("/rating", authMiddleware, submitRating);
 orderRouter.get("/list", authMiddleware, listOrders);
 orderRouter.delete("/delete/:orderId", authMiddleware, deleteOrder);
 
