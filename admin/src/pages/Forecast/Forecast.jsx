@@ -391,12 +391,28 @@ const Forecast = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Hour</th>
-                  <th>Forecast</th>
-                  <th>Lower Bound</th>
-                  <th>Upper Bound</th>
-                  <th>Confidence</th>
-                  <th>Weather Factor</th>
+                  <th>
+                    Hour <span className="header-tip">(Time of day)</span>
+                  </th>
+                  <th>
+                    Forecast{" "}
+                    <span className="header-tip">(Expected demand)</span>
+                  </th>
+                  <th>
+                    Lower Bound{" "}
+                    <span className="header-tip">(Min expected)</span>
+                  </th>
+                  <th>
+                    Upper Bound{" "}
+                    <span className="header-tip">(Max expected)</span>
+                  </th>
+                  <th>
+                    Confidence <span className="header-tip">(How sure %)</span>
+                  </th>
+                  <th>
+                    Weather Factor{" "}
+                    <span className="header-tip">(Weather impact)</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

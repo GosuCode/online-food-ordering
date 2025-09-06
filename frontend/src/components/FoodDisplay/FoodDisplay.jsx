@@ -9,7 +9,7 @@ const FoodDisplay = ({ category }) => {
 
   const filteredFoodItems = food_list
     .filter((item) => category === "All" || category === item.category)
-    .slice(0, 10);
+    .slice(0, 8);
 
   return (
     <div className="food-display" id="food-display">

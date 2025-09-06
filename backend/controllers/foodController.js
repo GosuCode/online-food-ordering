@@ -139,7 +139,7 @@ const getRecommendations = async (req, res) => {
       const popularItems = allFoods
         .filter((food) => food.totalRatings > 0)
         .sort((a, b) => b.averageRating - a.averageRating)
-        .slice(0, 10);
+        .slice(0, 8);
 
       return res.json({ success: true, data: popularItems });
     }
@@ -292,7 +292,7 @@ const generateRecommendations = (
   // Sort by recommendation score and return top 10
   return recommendations
     .sort((a, b) => b.recommendationScore - a.recommendationScore)
-    .slice(0, 10);
+    .slice(0, 8);
 };
 
 // get pricing rules (admin only)
