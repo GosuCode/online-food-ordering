@@ -395,6 +395,23 @@ const testPricing = async (req, res) => {
   }
 };
 
+// get all food categories
+const getCategories = async (req, res) => {
+  try {
+    const categories = await foodModel.distinct("category");
+    const formattedCategories = categories.map((category) => ({
+      name: category,
+      displayName: category.replace("_", " ").toUpperCase(),
+      image: `/src/assets/category/${category}.jpg`,
+    }));
+
+    res.json({ success: true, data: formattedCategories });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error getting categories" });
+  }
+};
+
 export {
   addFood,
   listFood,
@@ -405,4 +422,5 @@ export {
   updatePricingRule,
   createPricingRule,
   testPricing,
+  getCategories,
 };

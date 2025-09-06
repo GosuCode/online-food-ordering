@@ -53,7 +53,6 @@ const Analytics = ({ url }) => {
   const [ordersData, setOrdersData] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [orderStatusData, setOrderStatusData] = useState([]);
-  const [topSellingData, setTopSellingData] = useState([]);
   const [hourlyData, setHourlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
@@ -89,7 +88,6 @@ const Analytics = ({ url }) => {
         processOrdersData(filteredOrders);
         processRevenueData(filteredOrders);
         processOrderStatusData(filteredOrders);
-        processTopSellingData(filteredOrders);
         processHourlyData(filteredOrders);
         processCategoryData(foodItems, filteredOrders);
       }
@@ -155,48 +153,27 @@ const Analytics = ({ url }) => {
 
   const processOrderStatusData = (orders) => {
     const statusCounts = {
-      "Food Processing": 0,
-      "Out for delivery": 0,
-      Delivered: 0,
+      placed: 0,
+      confirmed: 0,
+      preparing: 0,
+      out_for_delivery: 0,
+      delivered: 0,
     };
 
     orders.forEach((order) => {
-      if (Object.prototype.hasOwnProperty.call(statusCounts, order.status)) {
+      if (order.status in statusCounts) {
         statusCounts[order.status]++;
       }
     });
 
-    const data = Object.entries(statusCounts).map(([name, value]) => ({
-      name,
-      value,
-    }));
+    const data = Object.entries(statusCounts)
+      .filter(([, value]) => value > 0)
+      .map(([name, value]) => ({
+        name: name.replace("_", " ").toUpperCase(),
+        value,
+      }));
 
     setOrderStatusData(data);
-  };
-
-  const processTopSellingData = (orders) => {
-    const itemSales = {};
-
-    orders.forEach((order) => {
-      order.items.forEach((item) => {
-        if (itemSales[item.name]) {
-          itemSales[item.name].sales += item.quantity;
-          itemSales[item.name].revenue += item.price * item.quantity;
-        } else {
-          itemSales[item.name] = {
-            name: item.name,
-            sales: item.quantity,
-            revenue: item.price * item.quantity,
-          };
-        }
-      });
-    });
-
-    const topSelling = Object.values(itemSales)
-      .sort((a, b) => b.sales - a.sales)
-      .slice(0, 10);
-
-    setTopSellingData(topSelling);
   };
 
   const processHourlyData = (orders) => {
@@ -244,7 +221,17 @@ const Analytics = ({ url }) => {
       });
     });
 
-    setCategoryData(Object.values(categoryStats));
+    // Filter out categories with no orders and format names
+    const filteredData = Object.values(categoryStats)
+      .filter((category) => category.orders > 0)
+      .map((category) => ({
+        ...category,
+        name: category.name.replace("_", " ").toUpperCase(),
+        avgOrderValue:
+          category.orders > 0 ? category.revenue / category.orders : 0,
+      }));
+
+    setCategoryData(filteredData);
   };
 
   useEffect(() => {
@@ -463,19 +450,6 @@ const Analytics = ({ url }) => {
           </Card>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="Top Selling Items" size="small">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topSellingData.slice(0, 5)} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="sales" fill="#fa8c16" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-        <Col xs={24} lg={8}>
           <Card title="Orders by Hour" size="small">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={hourlyData}>
@@ -484,6 +458,28 @@ const Analytics = ({ url }) => {
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="orders" fill="#722ed1" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col xs={24} lg={8}>
+          <Card title="Average Order Value by Category" size="small">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={categoryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value) => [
+                    `Rs. ${value.toFixed(0)}`,
+                    "Avg Value",
+                  ]}
+                />
+                <Bar
+                  dataKey="avgOrderValue"
+                  fill="#fa8c16"
+                  name="Average Order Value (Rs.)"
+                />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -498,11 +494,22 @@ const Analytics = ({ url }) => {
               <BarChart data={categoryData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="orders" fill="#1890ff" name="Orders" />
-                <Bar dataKey="revenue" fill="#52c41a" name="Revenue (Rs.)" />
+                <Bar
+                  yAxisId="left"
+                  dataKey="orders"
+                  fill="#1890ff"
+                  name="Orders"
+                />
+                <Bar
+                  yAxisId="right"
+                  dataKey="revenue"
+                  fill="#52c41a"
+                  name="Revenue (Rs.)"
+                />
               </BarChart>
             </ResponsiveContainer>
           </Card>

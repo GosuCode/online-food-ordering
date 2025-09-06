@@ -9,6 +9,7 @@ import {
   updatePricingRule,
   createPricingRule,
   testPricing,
+  getCategories,
 } from "../controllers/foodController.js";
 import multer from "multer";
 import authMiddleware from "../middleware/auth.js";
@@ -28,6 +29,7 @@ const upload = multer({ storage: storage });
 
 foodRouter.post("/add", upload.single("image"), authMiddleware, addFood);
 foodRouter.get("/list", listFood);
+foodRouter.get("/categories", getCategories);
 foodRouter.get("/recommendations/:userId", authMiddleware, getRecommendations);
 foodRouter.get("/:id", getFoodById);
 foodRouter.post("/remove", authMiddleware, removeFood);

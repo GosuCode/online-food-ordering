@@ -34,14 +34,13 @@ const Add = ({ url }) => {
   const [imageFile, setImageFile] = useState(null);
 
   const categories = [
-    { value: "pizza", label: "pizza" },
-    { value: "burger", label: "burger" },
-    { value: "momo", label: "momo" },
-    { value: "cold_drinks", label: "cold_drinks" },
-    { value: "soup", label: "soup" },
-    { value: "rice", label: "rice" },
-    { value: "pasta", label: "pasta" },
-    { value: "dessert", label: "dessert" },
+    { value: "pizza", label: "Pizza" },
+    { value: "burger", label: "Burger" },
+    { value: "momo", label: "Momo" },
+    { value: "cold_drinks", label: "Cold Drinks" },
+    { value: "soup", label: "Soup" },
+    { value: "rice", label: "Rice" },
+    { value: "dessert", label: "Dessert" },
   ];
 
   const onFinish = async (values) => {
@@ -179,9 +178,22 @@ const Add = ({ url }) => {
                   name="category"
                   rules={[
                     { required: true, message: "Please select category" },
+                    {
+                      validator: (_, value) => {
+                        const validCategories = categories.map(
+                          (cat) => cat.value
+                        );
+                        if (value && !validCategories.includes(value)) {
+                          return Promise.reject(
+                            new Error("Please select a valid category")
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
                   ]}
                 >
-                  <Select placeholder="Select category">
+                  <Select placeholder="Select category" showSearch>
                     {categories.map((category) => (
                       <Option key={category.value} value={category.value}>
                         {category.label}
@@ -197,8 +209,20 @@ const Add = ({ url }) => {
                     { required: true, message: "Please enter price" },
                     {
                       type: "number",
-                      min: 0,
-                      message: "Price must be positive",
+                      min: 1,
+                      message: "Price must be at least Rs. 1",
+                    },
+                    {
+                      validator: (_, value) => {
+                        if (value && (value < 1 || value > 10000)) {
+                          return Promise.reject(
+                            new Error(
+                              "Price must be between Rs. 1 and Rs. 10,000"
+                            )
+                          );
+                        }
+                        return Promise.resolve();
+                      },
                     },
                   ]}
                 >
@@ -206,7 +230,8 @@ const Add = ({ url }) => {
                     style={{ width: "100%" }}
                     placeholder="Enter price"
                     prefix="Rs."
-                    min={0}
+                    min={1}
+                    max={10000}
                     precision={2}
                   />
                 </Form.Item>

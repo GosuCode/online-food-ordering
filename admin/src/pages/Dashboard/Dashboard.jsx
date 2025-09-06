@@ -57,8 +57,11 @@ const Dashboard = ({ url }) => {
     {
       title: "Customer",
       key: "customer",
-      render: (_, record) =>
-        `${record.address.firstName} ${record.address.lastName}`,
+      render: (_, record) => {
+        // Get name from populated user data
+        const userName = record.userId?.name || "Unknown User";
+        return userName;
+      },
     },
     {
       title: "Amount",
@@ -72,14 +75,18 @@ const Dashboard = ({ url }) => {
       key: "status",
       render: (status) => {
         const color =
-          status === "Delivered"
+          status === "delivered"
             ? "green"
-            : status === "Food Processing"
+            : status === "preparing"
             ? "blue"
-            : status === "Out for delivery"
+            : status === "out_for_delivery"
             ? "orange"
+            : status === "confirmed"
+            ? "cyan"
             : "red";
-        return <Tag color={color}>{status}</Tag>;
+        return (
+          <Tag color={color}>{status.replace("_", " ").toUpperCase()}</Tag>
+        );
       },
     },
     {
@@ -90,6 +97,11 @@ const Dashboard = ({ url }) => {
         const now = new Date();
         const orderDate = new Date(date);
         const diffInMinutes = Math.floor((now - orderDate) / (1000 * 60));
+
+        // Handle future dates or invalid dates
+        if (diffInMinutes < 0) {
+          return "Just now";
+        }
 
         if (diffInMinutes < 60) {
           return `${diffInMinutes} min ago`;
@@ -152,13 +164,13 @@ const Dashboard = ({ url }) => {
         );
 
         const processingOrders = orders.filter(
-          (order) => order.status === "Food Processing"
+          (order) => order.status === "preparing"
         ).length;
         const outForDelivery = orders.filter(
-          (order) => order.status === "Out for delivery"
+          (order) => order.status === "out_for_delivery"
         ).length;
         const deliveredOrders = orders.filter(
-          (order) => order.status === "Delivered"
+          (order) => order.status === "delivered"
         ).length;
 
         // Get recent orders (last 5)
@@ -338,7 +350,7 @@ const Dashboard = ({ url }) => {
           <Card title="Order Status Distribution" size="small">
             <Space direction="vertical" style={{ width: "100%" }}>
               <div>
-                <Text>Processing</Text>
+                <Text>Processing ({dashboardData.processingOrders})</Text>
                 <Progress
                   percent={
                     dashboardData.totalOrders > 0
@@ -354,7 +366,7 @@ const Dashboard = ({ url }) => {
                 />
               </div>
               <div>
-                <Text>Out for Delivery</Text>
+                <Text>Out for Delivery ({dashboardData.outForDelivery})</Text>
                 <Progress
                   percent={
                     dashboardData.totalOrders > 0
@@ -369,7 +381,7 @@ const Dashboard = ({ url }) => {
                 />
               </div>
               <div>
-                <Text>Delivered</Text>
+                <Text>Delivered ({dashboardData.deliveredOrders})</Text>
                 <Progress
                   percent={
                     dashboardData.totalOrders > 0
@@ -381,6 +393,31 @@ const Dashboard = ({ url }) => {
                       : 0
                   }
                   strokeColor="#52c41a"
+                />
+              </div>
+              <div>
+                <Text>
+                  Placed (
+                  {dashboardData.totalOrders -
+                    dashboardData.processingOrders -
+                    dashboardData.outForDelivery -
+                    dashboardData.deliveredOrders}
+                  )
+                </Text>
+                <Progress
+                  percent={
+                    dashboardData.totalOrders > 0
+                      ? Math.round(
+                          ((dashboardData.totalOrders -
+                            dashboardData.processingOrders -
+                            dashboardData.outForDelivery -
+                            dashboardData.deliveredOrders) /
+                            dashboardData.totalOrders) *
+                            100
+                        )
+                      : 0
+                  }
+                  strokeColor="#ff4d4f"
                 />
               </div>
             </Space>
@@ -397,6 +434,7 @@ const Dashboard = ({ url }) => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      padding: "4px 0",
                     }}
                   >
                     <Text>{item.name}</Text>

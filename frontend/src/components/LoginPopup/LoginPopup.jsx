@@ -19,10 +19,87 @@ const LoginPopup = ({ setShowLogin }) => {
     phone: "",
   });
 
+  const cityOptions = {
+    "Province 1": [
+      "Biratnagar",
+      "Dharan",
+      "Itahari",
+      "Bhadrapur",
+      "Inaruwa",
+      "Damak",
+    ],
+    "Madhesh Province": [
+      "Janakpur",
+      "Bharatpur",
+      "Birgunj",
+      "Kalaiya",
+      "Jaleshwar",
+      "Gaur",
+    ],
+    "Bagmati Province": [
+      "Kathmandu",
+      "Lalitpur",
+      "Bhaktapur",
+      "Hetauda",
+      "Banepa",
+      "Panauti",
+    ],
+    "Gandaki Province": [
+      "Pokhara",
+      "Syangja",
+      "Gorkha",
+      "Lumle",
+      "Kaski",
+      "Tanahun",
+    ],
+    "Lumbini Province": [
+      "Butwal",
+      "Bhairahawa",
+      "Tansen",
+      "Gulmi",
+      "Nawalparasi",
+      "Rupandehi",
+    ],
+    "Karnali Province": [
+      "Surkhet",
+      "Jumla",
+      "Dolpa",
+      "Mugu",
+      "Humla",
+      "Kalikot",
+    ],
+    "Sudurpashchim Province": [
+      "Dhangadhi",
+      "Mahendranagar",
+      "Tikapur",
+      "Baitadi",
+      "Dadeldhura",
+      "Achham",
+    ],
+  };
+
   const onChangeHandler = (event) => {
     const name = event.target.name;
-    const value = event.target.value;
-    setData((data) => ({ ...data, [name]: value }));
+    let value = event.target.value;
+
+    // Filter input based on field type
+    if (name === "name") {
+      // Only allow letters and spaces
+      value = value.replace(/[^a-zA-Z\s]/g, "");
+    } else if (name === "phone") {
+      // Only allow digits and limit to 10 characters
+      value = value.replace(/[^0-9]/g, "").slice(0, 10);
+    } else if (name === "email") {
+      // Allow valid email characters
+      value = value.replace(/[^a-zA-Z0-9._%+-@]/g, "");
+    }
+
+    // Reset city when state changes
+    if (name === "state") {
+      setData((data) => ({ ...data, [name]: value, city: "" }));
+    } else {
+      setData((data) => ({ ...data, [name]: value }));
+    }
   };
 
   const validateForm = () => {
@@ -43,8 +120,8 @@ const LoginPopup = ({ setShowLogin }) => {
         toast.error("Name cannot contain numbers");
         return false;
       }
-      if (!data.email.endsWith("@gmail.com")) {
-        toast.error("Please enter a valid Gmail address");
+      if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(data.email)) {
+        toast.error("Email must be a valid Gmail address");
         return false;
       }
       if (data.password.length < 8) {
@@ -53,6 +130,23 @@ const LoginPopup = ({ setShowLogin }) => {
       }
       if (!/^[0-9]{10}$/.test(data.phone)) {
         toast.error("Phone number must be exactly 10 digits");
+        return false;
+      }
+      const validStates = [
+        "Province 1",
+        "Madhesh Province",
+        "Bagmati Province",
+        "Gandaki Province",
+        "Lumbini Province",
+        "Karnali Province",
+        "Sudurpashchim Province",
+      ];
+      if (!validStates.includes(data.state)) {
+        toast.error("Please select a valid state");
+        return false;
+      }
+      if (data.state && !cityOptions[data.state].includes(data.city)) {
+        toast.error("Please select a valid city for the selected state");
         return false;
       }
     }
@@ -106,6 +200,8 @@ const LoginPopup = ({ setShowLogin }) => {
                 type="text"
                 placeholder="Full Name"
                 required
+                pattern="[a-zA-Z\s]+"
+                title="Name can only contain letters and spaces"
               />
               <select
                 name="state"
@@ -130,14 +226,30 @@ const LoginPopup = ({ setShowLogin }) => {
                   Sudurpashchim Province
                 </option>
               </select>
-              <input
+              <select
                 name="city"
                 onChange={onChangeHandler}
                 value={data.city}
-                type="text"
-                placeholder="City"
                 required
-              />
+                disabled={!data.state}
+                style={{
+                  padding: "10px",
+                  marginBottom: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  backgroundColor: !data.state ? "#f5f5f5" : "white",
+                }}
+              >
+                <option value="">
+                  {data.state ? "Select City" : "Select State First"}
+                </option>
+                {data.state &&
+                  cityOptions[data.state]?.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+              </select>
               <input
                 name="street"
                 onChange={onChangeHandler}
@@ -151,9 +263,11 @@ const LoginPopup = ({ setShowLogin }) => {
                 onChange={onChangeHandler}
                 value={data.phone}
                 type="tel"
-                placeholder="Phone number"
+                placeholder="Phone number (10 digits)"
                 required
                 pattern="[0-9]{10}"
+                title="Phone number must be exactly 10 digits"
+                maxLength="10"
               />
             </>
           )}
@@ -164,6 +278,8 @@ const LoginPopup = ({ setShowLogin }) => {
             type="email"
             placeholder="Gmail address"
             required
+            pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
+            title="Please enter a valid Gmail address"
           />
           <input
             name="password"
@@ -172,6 +288,7 @@ const LoginPopup = ({ setShowLogin }) => {
             type="password"
             placeholder="Password (min 8 characters)"
             required
+            minLength="8"
           />
         </div>
         <button type="submit">

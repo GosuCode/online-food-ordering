@@ -569,8 +569,12 @@ const seedOrders = async (users, foods) => {
   // Generate orders for the last 30 days
   for (let i = 0; i < 200; i++) {
     const user = users[Math.floor(Math.random() * users.length)];
-    const orderDate = new Date("2024-01-01"); // Fixed base date
-    orderDate.setDate(orderDate.getDate() + Math.floor(Math.random() * 30));
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const orderDate = new Date(
+      thirtyDaysAgo.getTime() +
+        Math.random() * (now.getTime() - thirtyDaysAgo.getTime())
+    );
     orderDate.setHours(Math.floor(Math.random() * 24));
     orderDate.setMinutes(Math.floor(Math.random() * 60));
 
