@@ -227,7 +227,7 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-actions">
-              {!cartItems[id] ? (
+              {!cartItems || !cartItems[id] ? (
                 <button onClick={handleAddToCart} className="add-to-cart-btn">
                   <img src={assets.add_icon_white} alt="Add" />
                   Add to Cart
@@ -242,7 +242,7 @@ const ProductDetail = () => {
                     Remove from Cart
                   </button>
                   <div className="cart-quantity">
-                    <span>In Cart: {cartItems[id]}</span>
+                    <span>In Cart: {cartItems?.[id] || 0}</span>
                   </div>
                 </div>
               )}

@@ -14,6 +14,7 @@ const Cart = () => {
 
     food_list.forEach((item) => {
       if (
+        cartItems &&
         cartItems[item._id] > 0 &&
         item.discount > 0 &&
         item.originalPrice &&
@@ -25,7 +26,7 @@ const Cart = () => {
 
         savingsBreakdown.push({
           name: item.name,
-          quantity: cartItems[item._id],
+          quantity: cartItems?.[item._id] || 0,
           originalPrice: item.originalPrice,
           discountedPrice: item.price,
           discount: item.discount,
@@ -66,7 +67,7 @@ const Cart = () => {
   const getOriginalTotal = () => {
     let originalTotal = 0;
     food_list.forEach((item) => {
-      if (cartItems[item._id] > 0 && item.price) {
+      if (cartItems && cartItems[item._id] > 0 && item.price) {
         if (item.originalPrice) {
           originalTotal += item.originalPrice * cartItems[item._id];
         } else {
@@ -105,7 +106,7 @@ const Cart = () => {
         <br />
         <hr />
         {food_list.map((item, index) => {
-          if (cartItems[item._id] > 0) {
+          if (cartItems && cartItems[item._id] > 0) {
             return (
               <div key={index}>
                 <div className="cart-items-title cart-items-item">
@@ -141,8 +142,8 @@ const Cart = () => {
                       <p>-</p>
                     )}
                   </div>
-                  <p>{cartItems[item._id]}</p>
-                  <p>Rs. {(item.price || 0) * cartItems[item._id]}</p>
+                  <p>{cartItems?.[item._id] || 0}</p>
+                  <p>Rs. {(item.price || 0) * (cartItems?.[item._id] || 0)}</p>
                   <p onClick={() => removeFromCart(item._id)} className="cross">
                     x
                   </p>

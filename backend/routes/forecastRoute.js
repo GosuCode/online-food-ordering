@@ -2,37 +2,31 @@ import express from "express";
 import {
   getForecastSummary,
   getFoodForecast,
-  generateForecasts,
-  getForecastConfig,
-  updateForecastConfig,
   getHistoricalData,
-  getForecastAccuracy,
-  getForecastAlerts,
+  getAlerts,
+  getConfig,
+  generateForecasts,
 } from "../controllers/forecastController.js";
 import authMiddleware from "../middleware/auth.js";
 
 const forecastRouter = express.Router();
 
-// Forecast summary for admin dashboard
+// Get forecast summary for all foods
 forecastRouter.get("/summary", authMiddleware, getForecastSummary);
 
-// Get forecasts for specific food item
-forecastRouter.get("/food/:foodId", authMiddleware, getFoodForecast);
+// Get detailed forecast for a specific food
+forecastRouter.get("/food/:id", authMiddleware, getFoodForecast);
 
-// Generate new forecasts for all food items
+// Get historical data for a food item
+forecastRouter.get("/historical/:id", authMiddleware, getHistoricalData);
+
+// Get forecast alerts
+forecastRouter.get("/alerts", authMiddleware, getAlerts);
+
+// Get forecast configuration
+forecastRouter.get("/config", authMiddleware, getConfig);
+
+// Generate forecasts for all foods
 forecastRouter.post("/generate", authMiddleware, generateForecasts);
-
-// Forecast configuration management
-forecastRouter.get("/config", authMiddleware, getForecastConfig);
-forecastRouter.put("/config", authMiddleware, updateForecastConfig);
-
-// Historical data
-forecastRouter.get("/historical/:foodId", authMiddleware, getHistoricalData);
-
-// Forecast accuracy metrics
-forecastRouter.get("/accuracy/:foodId", authMiddleware, getForecastAccuracy);
-
-// Forecast alerts
-forecastRouter.get("/alerts", authMiddleware, getForecastAlerts);
 
 export default forecastRouter;

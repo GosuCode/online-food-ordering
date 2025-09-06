@@ -71,6 +71,7 @@ const Sidebar = () => {
     if (path.includes("/list")) return "list";
     if (path.includes("/orders")) return "orders";
     if (path.includes("/pricing")) return "pricing";
+    if (path.includes("/forecast")) return "forecast";
     return "dashboard";
   };
 

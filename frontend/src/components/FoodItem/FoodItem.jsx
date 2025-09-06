@@ -36,7 +36,7 @@ const FoodItem = ({
           alt=""
           className="food-item-image"
         />
-        {!cartItems[id] ? (
+        {!cartItems || !cartItems[id] ? (
           <img
             className="add"
             onClick={(e) => {
@@ -56,7 +56,7 @@ const FoodItem = ({
               src={assets.remove_icon_red}
               alt=""
             />
-            <p>{cartItems[id]}</p>
+            <p>{cartItems?.[id] || 0}</p>
             <img
               onClick={(e) => {
                 e.stopPropagation();
@@ -83,9 +83,11 @@ const FoodItem = ({
         <div className="food-item-pricing">
           {discount > 0 && originalPrice && price ? (
             <div className="price-with-discount">
-              <p className="food-item-price">Rs. {price}</p>
-              <p className="food-item-original-price">Rs. {originalPrice}</p>
-              <div className="discount-info">
+              <div className="price-row">
+                <p className="food-item-price">Rs. {price}</p>
+                <p className="food-item-original-price">Rs. {originalPrice}</p>
+              </div>
+              <div className="discount-row">
                 <span className="discount-badge">-{discount}%</span>
                 <span className="discount-amount">
                   Save Rs. {(originalPrice - price).toFixed(2)}

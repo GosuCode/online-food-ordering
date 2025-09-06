@@ -65,21 +65,35 @@ const MyOrders = () => {
     <div className="my-orders">
       <h2>Orders</h2>
       <div className="container">
-        {data.map((order, index) => {
-          return (
+        {data.length === 0 ? (
+          <div className="no-orders">
+            <img
+              src={assets.empty_box}
+              alt="No Orders"
+              className="no-orders-img"
+            />
+            <h3>No Orders Yet</h3>
+            <p>Looks like you haven’t ordered anything yet.</p>
+            <button
+              className="shop-now-btn"
+              onClick={() => (window.location.href = "/")}
+            >
+              Shop Now
+            </button>
+          </div>
+        ) : (
+          data.map((order, index) => (
             <div key={index} className="my-orders-order">
               <img src={assets.parcel_icon} alt="" />
               <p>
-                {order.items.map((item, index) => {
-                  if (index === order.items.length - 1) {
-                    return item.name + " X " + item.quantity;
-                  } else {
-                    return item.name + " X " + item.quantity + ",";
-                  }
-                })}
+                {order.items.map((item, index) =>
+                  index === order.items.length - 1
+                    ? `${item.name} X ${item.quantity}`
+                    : `${item.name} X ${item.quantity}, `
+                )}
               </p>
               <p>Rs. {order.amount}.00</p>
-              <p>items: {order.items.length}</p>
+              <p>Items: {order.items.length}</p>
               <p>
                 <span>&#x25cf;</span>
                 <b> {order.status}</b>
@@ -99,8 +113,8 @@ const MyOrders = () => {
               )}
               <button onClick={fetchOrders}>Track Order</button>
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
 
       {/* Rating Modal */}

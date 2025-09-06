@@ -82,7 +82,8 @@
 .food-item-pricing {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    text-align: left;
 }
 
 .food-item-price {
@@ -91,12 +92,20 @@
     font-weight: 700;
     margin: 0;
     text-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+    text-align: left;
 }
 
 .price-with-discount {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.price-row {
+    display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
@@ -108,11 +117,11 @@
     text-decoration: line-through;
 }
 
-.discount-info {
+.discount-row {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .discount-badge {

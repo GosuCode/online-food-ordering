@@ -34,14 +34,14 @@ const Add = ({ url }) => {
   const [imageFile, setImageFile] = useState(null);
 
   const categories = [
-    { value: "Salad", label: "Salad" },
-    { value: "Rolls", label: "Rolls" },
-    { value: "Deserts", label: "Desserts" },
-    { value: "Sandwich", label: "Sandwich" },
-    { value: "Cake", label: "Cake" },
-    { value: "Pure Veg", label: "Pure Veg" },
-    { value: "Pasta", label: "Pasta" },
-    { value: "Noodles", label: "Noodles" },
+    { value: "pizza", label: "pizza" },
+    { value: "burger", label: "burger" },
+    { value: "momo", label: "momo" },
+    { value: "cold_drinks", label: "cold_drinks" },
+    { value: "soup", label: "soup" },
+    { value: "rice", label: "rice" },
+    { value: "pasta", label: "pasta" },
+    { value: "dessert", label: "dessert" },
   ];
 
   const onFinish = async (values) => {
@@ -132,7 +132,7 @@ const Add = ({ url }) => {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{ category: "Salad" }}
+          initialValues={{ category: "pizza" }}
           size="large"
         >
           <Row gutter={[24, 16]}>
