@@ -97,7 +97,7 @@ const listOrders = async (req, res) => {
   try {
     let userData = await userModel.findById(req.body.userId);
     if (userData && userData.role === "admin") {
-      const orders = await orderModel.find({});
+      const orders = await orderModel.find({}).populate("userId", "name email");
       res.json({ success: true, data: orders });
     } else {
       res.json({ success: false, message: "You are not admin" });

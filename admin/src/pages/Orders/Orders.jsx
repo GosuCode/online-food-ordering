@@ -74,8 +74,7 @@ const Orders = ({ url }) => {
 
     const filtered = orders.filter((order) => {
       const orderId = order._id.toLowerCase();
-      const customerName =
-        `${order.address.firstName} ${order.address.lastName}`.toLowerCase();
+      const customerName = order.address.name.toLowerCase();
       const status = order.status.toLowerCase();
       const searchValue = value.toLowerCase();
 

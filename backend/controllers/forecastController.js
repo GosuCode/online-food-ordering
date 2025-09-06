@@ -30,10 +30,8 @@ export const getForecastSummary = async (req, res) => {
           (sum, f) => sum + f.predictions.pointForecast,
           0
         );
-        const peakForecast = forecasts.reduce(
-          (max, f) =>
-            f.predictions.pointForecast > max.pointForecast ? f : max,
-          forecasts[0]
+        const peakForecast = forecasts.reduce((max, f) =>
+          f.predictions.pointForecast > max.predictions.pointForecast ? f : max
         );
 
         summary.push({

@@ -121,31 +121,31 @@ const Forecast = () => {
     }
   };
 
-  const generateForecasts = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:4000/api/forecast/generate",
-        {
-          method: "POST",
-          headers: {
-            token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await response.json();
-      if (data.success) {
-        alert(`Generated forecasts for ${data.data.length} food items`);
-        fetchForecastData();
-      }
-    } catch (error) {
-      console.error("Error generating forecasts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const generateForecasts = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("token");
+  //     const response = await fetch(
+  //       "http://localhost:4000/api/forecast/generate",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           token,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       alert(`Generated forecasts for ${data.data.length} food items`);
+  //       fetchForecastData();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error generating forecasts:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleFoodSelect = (food) => {
     setSelectedFood(food);
@@ -209,19 +209,19 @@ const Forecast = () => {
       <div className="forecast-header">
         <h1>📊 Demand Forecasting</h1>
         <div className="forecast-actions">
-          <button
+          {/* <button
             className="generate-btn"
             onClick={generateForecasts}
             disabled={loading}
           >
             {loading ? "Generating..." : "🔄 Generate Forecasts"}
-          </button>
-          <button
+          </button> */}
+          {/* <button
             className="config-btn"
             onClick={() => setShowConfig(!showConfig)}
           >
             ⚙️ Configuration
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -244,7 +244,7 @@ const Forecast = () => {
       )}
 
       {/* Configuration Panel */}
-      {showConfig && config && (
+      {/* {showConfig && config && (
         <div className="config-panel">
           <h3>⚙️ Forecast Configuration</h3>
           <div className="config-grid">
@@ -266,7 +266,7 @@ const Forecast = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Forecast Summary */}
       <div className="forecast-summary">

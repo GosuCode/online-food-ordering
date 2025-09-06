@@ -1,6 +1,6 @@
 # QuickBite - Food Ordering Website
 
-A comprehensive food delivery platform built with the MERN stack, featuring separate user and admin panels with real-time order management and secure payment processing.
+A comprehensive food delivery platform built with the MERN stack, featuring separate user and admin panels with real-time order management, dynamic pricing, demand forecasting, and secure payment processing.
 
 ## 🚀 Features
 
@@ -20,6 +20,9 @@ A comprehensive food delivery platform built with the MERN stack, featuring sepa
 - **Order Management**: Process and track customer orders
 - **User Management**: View customer data and orders
 - **Image Upload**: Easy food image management
+- **Demand Forecasting**: 24-hour demand predictions with peak hour analysis
+- **Dynamic Pricing**: Automated price adjustments based on demand, loyalty, and weather
+- **Analytics**: Real-time demand levels and pricing insights
 
 ### Technical Features
 
@@ -30,17 +33,21 @@ A comprehensive food delivery platform built with the MERN stack, featuring sepa
 - **Role-based Access**: User and admin permissions
 - **Form Validation**: Client and server-side validation
 - **Toast Notifications**: User feedback system
+- **Demand Forecasting**: Time series prediction algorithms
+- **Dynamic Pricing**: Multi-factor rule-based pricing system
+- **Real-time Analytics**: Live demand level monitoring
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React, Vite, React Router, Context API
-- **Admin Panel**: React, Vite
+- **Admin Panel**: React, Vite, Recharts (Data Visualization)
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB with Mongoose
 - **Authentication**: JWT (JSON Web Tokens)
 - **Payment**: Stripe API
 - **Styling**: CSS3 with responsive design
 - **State Management**: React Context API
+- **Analytics**: Custom forecasting and pricing algorithms
 
 ## 📦 Project Structure
 
@@ -165,6 +172,9 @@ Update the following files with your backend URL:
 - **Food Management**: Add and manage menu items
 - **Order Management**: Process customer orders
 - **User Management**: View customer information
+- **Forecast Dashboard**: 24-hour demand predictions with interactive charts
+- **Pricing Management**: Dynamic pricing rules and demand-based adjustments
+- **Analytics**: Real-time demand levels and peak hour analysis
 
 ## 🔧 API Endpoints
 
@@ -186,6 +196,14 @@ Update the following files with your backend URL:
 - `POST /api/order/add` - Place new order
 - `GET /api/order/list` - Get order list
 - `POST /api/order/update` - Update order status (admin)
+
+### Forecasting & Analytics
+
+- `GET /api/forecast/summary` - Get forecast summary for all foods
+- `GET /api/forecast/:id` - Get detailed forecast for specific food
+- `GET /api/forecast/historical/:id` - Get historical demand data
+- `GET /api/forecast/alerts` - Get forecast alerts
+- `POST /api/forecast/generate` - Generate new forecasts
 
 ### Cart Management
 
@@ -209,6 +227,12 @@ Update the following files with your backend URL:
 1. Update `frontend/src/assets/frontend_assets/assets.js`
 2. Add category to `menu_list` array
 3. Update food items with new category
+
+### Forecasting Configuration
+
+1. Modify demand patterns in `backend/scripts/seedData.js`
+2. Adjust pricing rules in `backend/models/pricingModel.js`
+3. Update weather impact factors in forecast generation
 
 ### Styling
 
@@ -243,6 +267,10 @@ Update the following files with your backend URL:
 3. Commit changes: `git commit -m 'Add feature'`
 4. Push to branch: `git push origin feature-name`
 5. Submit a pull request
+
+## 📊 Algorithm Documentation
+
+For detailed information about the algorithms used in this project, see [ALGORITHMS.md](ALGORITHMS.md).
 
 ## 📄 License
 
