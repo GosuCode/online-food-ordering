@@ -39,6 +39,11 @@ const Add = ({ url }) => {
   const [imageFile, setImageFile] = useState(null);
 
   const onFinish = async (values) => {
+    if (!imageFile) {
+      toast.error("Please upload a food image");
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
@@ -83,10 +88,14 @@ const Add = ({ url }) => {
         return false;
       }
       setImageFile(file);
-      return false; // Prevent auto upload
+      form.setFieldsValue({ image: file });
+      form.validateFields(["image"]);
+      return false;
     },
     onRemove: () => {
       setImageFile(null);
+      form.setFieldsValue({ image: undefined });
+      form.validateFields(["image"]);
     },
     showUploadList: {
       showPreviewIcon: false,
@@ -167,6 +176,19 @@ const Add = ({ url }) => {
                   }
                   required
                   tooltip="Upload a high-quality image for the food item"
+                  name="image"
+                  rules={[
+                    {
+                      validator: () => {
+                        if (!imageFile) {
+                          return Promise.reject(
+                            new Error("Please upload a food image")
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
                 >
                   <Dragger
                     {...uploadProps}
