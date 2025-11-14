@@ -3,7 +3,6 @@ import {
   Card,
   Form,
   Input,
-  Select,
   InputNumber,
   Upload,
   Button,
@@ -13,17 +12,23 @@ import {
   Space,
   message,
   Spin,
+  Divider,
 } from "antd";
-import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  InboxOutlined,
+  UploadOutlined,
+  ClearOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 const { Dragger } = Upload;
 
 const Add = ({ url }) => {
@@ -32,16 +37,6 @@ const Add = ({ url }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
-
-  const categories = [
-    { value: "pizza", label: "Pizza" },
-    { value: "burger", label: "Burger" },
-    { value: "momo", label: "Momo" },
-    { value: "cold_drinks", label: "Cold Drinks" },
-    { value: "soup", label: "Soup" },
-    { value: "rice", label: "Rice" },
-    { value: "dessert", label: "Dessert" },
-  ];
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -121,46 +116,131 @@ const Add = ({ url }) => {
   }
 
   return (
-    <div>
-      <Card>
-        <Title level={2} style={{ marginBottom: "24px", textAlign: "center" }}>
-          Add New Food Item
-        </Title>
+    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+      <Card
+        style={{
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          border: "none",
+        }}
+      >
+        <div style={{ marginBottom: "32px", textAlign: "center" }}>
+          <Title
+            level={2}
+            style={{
+              marginBottom: "8px",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontWeight: 700,
+            }}
+          >
+            Add New Food Item
+          </Title>
+          <Text type="secondary" style={{ fontSize: "16px" }}>
+            Fill in the details below to add a new item to the menu
+          </Text>
+        </div>
 
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{ category: "pizza" }}
+          initialValues={{}}
           size="large"
         >
-          <Row gutter={[24, 16]}>
+          <Row gutter={[32, 24]}>
             <Col xs={24} lg={12}>
-              <Form.Item
-                label="Food Image"
-                required
-                tooltip="Upload an image for the food item"
+              <Card
+                style={{
+                  borderRadius: "8px",
+                  border: "2px dashed #d9d9d9",
+                  backgroundColor: "#fafafa",
+                }}
               >
-                <Dragger {...uploadProps} style={{ height: "200px" }}>
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined
-                      style={{ fontSize: "48px", color: "#1890ff" }}
-                    />
-                  </p>
-                  <p className="ant-upload-text">
-                    Click or drag image file to this area to upload
-                  </p>
-                  <p className="ant-upload-hint">
-                    Support for single image upload. Max size: 2MB
-                  </p>
-                </Dragger>
-              </Form.Item>
+                <Form.Item
+                  label={
+                    <Text strong style={{ fontSize: "16px" }}>
+                      Food Image
+                      <Text type="danger"> *</Text>
+                    </Text>
+                  }
+                  required
+                  tooltip="Upload a high-quality image for the food item"
+                >
+                  <Dragger
+                    {...uploadProps}
+                    style={{
+                      height: "280px",
+                      borderRadius: "8px",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined
+                        style={{
+                          fontSize: "64px",
+                          background:
+                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                        }}
+                      />
+                    </p>
+                    <p
+                      className="ant-upload-text"
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 600,
+                        color: "#262626",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Click or drag image to upload
+                    </p>
+                    <p
+                      className="ant-upload-hint"
+                      style={{ color: "#8c8c8c", fontSize: "14px" }}
+                    >
+                      Support for JPG, PNG, GIF. Max size: 2MB
+                    </p>
+                  </Dragger>
+                  {imageFile && (
+                    <div
+                      style={{
+                        marginTop: "16px",
+                        padding: "12px",
+                        backgroundColor: "#f0f9ff",
+                        borderRadius: "6px",
+                        border: "1px solid #91caff",
+                      }}
+                    >
+                      <Space>
+                        <UploadOutlined style={{ color: "#1890ff" }} />
+                        <Text strong>{imageFile.name}</Text>
+                        <Text type="secondary">
+                          ({(imageFile.size / 1024).toFixed(2)} KB)
+                        </Text>
+                      </Space>
+                    </div>
+                  )}
+                </Form.Item>
+              </Card>
             </Col>
 
             <Col xs={24} lg={12}>
-              <Space direction="vertical" style={{ width: "100%" }}>
+              <Space
+                direction="vertical"
+                style={{ width: "100%" }}
+                size="large"
+              >
                 <Form.Item
-                  label="Food Name"
+                  label={
+                    <Text strong style={{ fontSize: "16px" }}>
+                      Food Name
+                      <Text type="danger"> *</Text>
+                    </Text>
+                  }
                   name="name"
                   rules={[
                     { required: true, message: "Please enter food name" },
@@ -168,24 +248,40 @@ const Add = ({ url }) => {
                   ]}
                 >
                   <Input
-                    placeholder="Enter food name"
-                    prefix={<PlusOutlined />}
+                    placeholder="e.g., Margherita Pizza"
+                    prefix={<PlusOutlined style={{ color: "#667eea" }} />}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                    }}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label="Category"
+                  label={
+                    <Text strong style={{ fontSize: "16px" }}>
+                      Category
+                      <Text type="danger"> *</Text>
+                    </Text>
+                  }
                   name="category"
+                  normalize={(value) => value && value.trim()}
                   rules={[
-                    { required: true, message: "Please select category" },
                     {
                       validator: (_, value) => {
-                        const validCategories = categories.map(
-                          (cat) => cat.value
-                        );
-                        if (value && !validCategories.includes(value)) {
+                        if (!value || value.trim().length === 0) {
                           return Promise.reject(
-                            new Error("Please select a valid category")
+                            new Error("Please enter category")
+                          );
+                        }
+                        if (value.trim().length < 2) {
+                          return Promise.reject(
+                            new Error("Category must be at least 2 characters")
+                          );
+                        }
+                        if (value.trim().length > 50) {
+                          return Promise.reject(
+                            new Error("Category must not exceed 50 characters")
                           );
                         }
                         return Promise.resolve();
@@ -193,17 +289,23 @@ const Add = ({ url }) => {
                     },
                   ]}
                 >
-                  <Select placeholder="Select category" showSearch>
-                    {categories.map((category) => (
-                      <Option key={category.value} value={category.value}>
-                        {category.label}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Input
+                    placeholder="e.g., Pizza, Burger, Momo"
+                    allowClear
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                    }}
+                  />
                 </Form.Item>
 
                 <Form.Item
-                  label="Price"
+                  label={
+                    <Text strong style={{ fontSize: "16px" }}>
+                      Price (Rs.)
+                      <Text type="danger"> *</Text>
+                    </Text>
+                  }
                   name="price"
                   rules={[
                     { required: true, message: "Please enter price" },
@@ -227,20 +329,34 @@ const Add = ({ url }) => {
                   ]}
                 >
                   <InputNumber
-                    style={{ width: "100%" }}
+                    style={{
+                      width: "100%",
+                      borderRadius: "8px",
+                    }}
                     placeholder="Enter price"
                     prefix="Rs."
                     min={1}
                     max={10000}
                     precision={2}
+                    formatter={(value) =>
+                      `Rs. ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/Rs.\s?|(,*)/g, "")}
                   />
                 </Form.Item>
               </Space>
             </Col>
           </Row>
 
+          <Divider style={{ margin: "32px 0" }} />
+
           <Form.Item
-            label="Description"
+            label={
+              <Text strong style={{ fontSize: "16px" }}>
+                Description
+                <Text type="danger"> *</Text>
+              </Text>
+            }
             name="description"
             rules={[
               { required: true, message: "Please enter description" },
@@ -251,31 +367,57 @@ const Add = ({ url }) => {
             ]}
           >
             <TextArea
-              rows={4}
-              placeholder="Enter food description"
+              rows={5}
+              placeholder="Describe the food item in detail (e.g., ingredients, taste, serving size...)"
               showCount
               maxLength={500}
+              style={{
+                borderRadius: "8px",
+                fontSize: "15px",
+              }}
             />
           </Form.Item>
 
-          <Form.Item style={{ textAlign: "center", marginTop: "32px" }}>
+          <Divider style={{ margin: "32px 0" }} />
+
+          <Form.Item style={{ textAlign: "center", marginTop: "24px" }}>
             <Space size="large">
               <Button
                 type="primary"
                 htmlType="submit"
                 size="large"
-                icon={<PlusOutlined />}
+                icon={<SaveOutlined />}
                 loading={loading}
-                style={{ minWidth: "120px" }}
+                style={{
+                  minWidth: "160px",
+                  height: "48px",
+                  borderRadius: "8px",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  border: "none",
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+                }}
               >
-                Add Food Item
+                {loading ? "Adding..." : "Add Food Item"}
               </Button>
               <Button
                 size="large"
-                onClick={() => form.resetFields()}
-                style={{ minWidth: "120px" }}
+                icon={<ClearOutlined />}
+                onClick={() => {
+                  form.resetFields();
+                  setImageFile(null);
+                }}
+                style={{
+                  minWidth: "160px",
+                  height: "48px",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                }}
               >
-                Reset
+                Reset Form
               </Button>
             </Space>
           </Form.Item>

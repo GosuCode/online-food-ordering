@@ -138,10 +138,10 @@ const PlaceOrder = () => {
       headers: { token },
     });
     if (response.data.success) {
-      const { session_url } = response.data;
-      window.location.replace(session_url);
+      const { orderId } = response.data;
+      navigate(`/order-confirmation?orderId=${orderId}`);
     } else {
-      toast.error("Errors!");
+      toast.error("Error placing order!");
     }
   };
 
@@ -255,17 +255,17 @@ const PlaceOrder = () => {
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>Rs. {getTotalCartAmount() === 0 ? 0 : 2}</p>
+              <p>Rs. {getTotalCartAmount() === 0 ? 0 : 10}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                Rs. {getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+                Rs. {getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 10}
               </b>
             </div>
           </div>
-          <button type="submit">PROCEED TO PAYMENT</button>
+          <button type="submit">PLACE ORDER</button>
         </div>
       </div>
     </form>

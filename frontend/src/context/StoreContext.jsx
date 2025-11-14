@@ -5,6 +5,9 @@ import PropTypes from "prop-types";
 
 export const StoreContext = createContext(null);
 
+const MAX_QTY_PER_ITEM = 10;
+const MAX_DISTINCT_ITEMS = 15;
+
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const url = "http://localhost:4000";
@@ -12,21 +15,53 @@ const StoreContextProvider = (props) => {
   const [food_list, setFoodList] = useState([]);
   const [userData, setUserData] = useState(null);
 
-  const addToCart = async (itemId) => {
-    if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
-    } else {
-      setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
-    }
+  const addToCart = async (itemId, quantity = 1) => {
+    setCartItems((prev) => {
+      const currentQty = prev[itemId] || 0;
+      const newQty = currentQty + quantity;
+
+      // Check if adding this quantity would exceed max per item
+      if (newQty > MAX_QTY_PER_ITEM) {
+        toast.error(`Maximum ${MAX_QTY_PER_ITEM} units per item allowed`);
+        return prev; // Return unchanged state
+      }
+
+      // Check if adding a new distinct item would exceed max distinct items
+      const distinctItemCount = Object.keys(prev).filter(
+        (id) => prev[id] > 0
+      ).length;
+      if (!prev[itemId] && distinctItemCount >= MAX_DISTINCT_ITEMS) {
+        toast.error(
+          `Maximum ${MAX_DISTINCT_ITEMS} different items allowed in cart`
+        );
+        return prev; // Return unchanged state
+      }
+
+      // Update cart with new quantity
+      return { ...prev, [itemId]: newQty };
+    });
+
+    // Make API calls for each item added (for backend sync)
     if (token) {
-      const response = await axios.post(
-        url + "/api/cart/add",
-        { itemId },
-        { headers: { token } }
-      );
-      if (response.data.success) {
-        toast.success("item Added to Cart");
-      } else {
+      try {
+        // Call API for each quantity added
+        const promises = [];
+        for (let i = 0; i < quantity; i++) {
+          promises.push(
+            axios.post(
+              url + "/api/cart/add",
+              { itemId },
+              { headers: { token } }
+            )
+          );
+        }
+        await Promise.all(promises);
+        // Show toast for single item additions (used by FoodItem component)
+        // ProductDetail handles its own toast messages
+        if (quantity === 1) {
+          toast.success("item Added to Cart");
+        }
+      } catch (error) {
         toast.error("Something went wrong");
       }
     }
@@ -67,7 +102,6 @@ const StoreContextProvider = (props) => {
     try {
       let apiUrl = url + "/api/food/list";
 
-      // Add user ID and city to the request if user is logged in
       if (token && userData) {
         const params = new URLSearchParams({
           userId: userData._id,
@@ -78,7 +112,6 @@ const StoreContextProvider = (props) => {
 
       const response = await axios.get(apiUrl);
       if (response.data.success && response.data.data) {
-        // Console log discount information for each food item
         console.log("\n🛒 FOOD LIST WITH DISCOUNTS:");
         response.data.data.forEach((item, index) => {
           if (item.discount > 0) {
@@ -100,11 +133,11 @@ const StoreContextProvider = (props) => {
         setFoodList(response.data.data);
       } else {
         console.error("Error fetching food list:", response.data);
-        setFoodList([]); // Set empty array as fallback
+        setFoodList([]);
       }
     } catch (error) {
       console.error("Error fetching food list:", error);
-      setFoodList([]); // Set empty array as fallback
+      setFoodList([]);
     }
   };
 
@@ -141,20 +174,16 @@ const StoreContextProvider = (props) => {
         setToken(token);
         await loadCardData(token);
         await fetchUserData(token);
-        // Fetch food list after user data is loaded
         await fetchFoodList();
       } else {
-        // If no token, fetch food list without user data
         await fetchFoodList();
       }
     }
     loadData();
   }, []);
 
-  // Refetch food list when user data changes to apply dynamic pricing
   useEffect(() => {
     if (userData) {
-      console.log("🔄 User data changed, refetching food list with pricing");
       fetchFoodList();
     }
   }, [userData]);

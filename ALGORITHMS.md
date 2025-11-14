@@ -70,15 +70,6 @@ FUNCTION classifyDemandLevel(demand):
         RETURN "low"
 ```
 
-#### Time Complexity
-
-- **O(24)** = O(1) per food item
-- **O(n)** where n = number of food items
-
-#### Space Complexity
-
-- **O(24n)** where n = number of food items
-
 ---
 
 ### 2. Dynamic Pricing Algorithm
@@ -138,15 +129,6 @@ FUNCTION calculateDiscount(rule, basePrice):
     RETURN discount
 ```
 
-#### Time Complexity
-
-- **O(r)** where r = number of pricing rules
-- **O(r log r)** for sorting rules by priority
-
-#### Space Complexity
-
-- **O(r)** for storing applied rules
-
 ---
 
 ### 3. Demand Level Calculation Algorithm
@@ -190,15 +172,6 @@ FUNCTION getDemandDiscount(demandLevel):
 
     RETURN discounts[demandLevel]
 ```
-
-#### Time Complexity
-
-- **O(1)** for counting orders (with proper indexing)
-- **O(1)** for level determination
-
-#### Space Complexity
-
-- **O(1)**
 
 ---
 

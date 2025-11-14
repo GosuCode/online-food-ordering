@@ -2,26 +2,23 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import foodModel from "../models/foodModel.js";
 import pricingService from "../services/pricingService.js";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /**
- * @desc Place new order, clear user's cart, and initiate Stripe checkout session
+ * @desc Place new order, clear user's cart (Cash on Delivery)
  * @param {object} req - The request object containing order details and user ID.
- * @param {object} res - The response object to send back the session URL or error.
- * @returns {object} JSON response with success status and Stripe session URL or an error message.
+ * @param {object} res - The response object to send back the order ID or error.
+ * @returns {object} JSON response with success status and order ID or an error message.
  *
  */
 
 const placeOrder = async (req, res) => {
-  const frontend_url = "http://localhost:5173"; // frontend client url
   try {
     const newOrder = new orderModel({
       userId: req.body.userId,
       items: req.body.items,
       amount: req.body.amount,
       address: req.body.address,
+      payment: false, // Cash on delivery - payment will be collected on delivery
     });
     await newOrder.save();
     await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
@@ -29,52 +26,29 @@ const placeOrder = async (req, res) => {
     // Update user loyalty stats
     await pricingService.updateUserStats(req.body.userId, req.body.amount);
 
-    const line_items = req.body.items.map((item) => ({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: item.name,
-        },
-        unit_amount: item.price * 100,
-      },
-      quantity: item.quantity,
-    }));
-
-    line_items.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "Delivery Charges",
-        },
-        unit_amount: 2 * 100,
-      },
-      quantity: 1,
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: line_items,
-      mode: "payment",
-      success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
-      cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`,
-    });
-
-    res.json({ success: true, session_url: session.url });
+    res.json({ success: true, orderId: newOrder._id });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });
   }
 };
 
+// verifyOrder is no longer needed for cash on delivery
+// Payment will be marked as true when order is delivered
 const verifyOrder = async (req, res) => {
-  const { orderId, success } = req.body;
+  // This endpoint is kept for backward compatibility but is no longer used
+  res.json({ success: true, message: "Order placed successfully" });
+};
+
+// Get single order by ID
+const getOrderById = async (req, res) => {
   try {
-    if (success == "true") {
-      await orderModel.findByIdAndUpdate(orderId, { payment: true });
-      res.json({ success: true, message: "Paid" });
-    } else {
-      await orderModel.findByIdAndDelete(orderId);
-      res.json({ success: false, message: "Not Paid" });
+    const { orderId } = req.params;
+    const order = await orderModel.findById(orderId);
+    if (!order) {
+      return res.json({ success: false, message: "Order not found" });
     }
+    res.json({ success: true, data: order });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });
@@ -201,6 +175,7 @@ const submitRating = async (req, res) => {
 export {
   placeOrder,
   verifyOrder,
+  getOrderById,
   userOrders,
   listOrders,
   updateStatus,

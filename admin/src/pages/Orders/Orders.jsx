@@ -161,12 +161,12 @@ const Orders = ({ url }) => {
         <Space direction="vertical" size="small">
           <Space>
             <Avatar size="small" icon={<UserOutlined />} />
-            <Text strong>{record.address.name}</Text>
+            <Text strong>{record.address.name || "N/A"}</Text>
           </Space>
           <Space>
             <PhoneOutlined style={{ color: "#8c8c8c" }} />
             <Text type="secondary" style={{ fontSize: "12px" }}>
-              {record.address.phone}
+              {record.address.phone || "N/A"}
             </Text>
           </Space>
         </Space>
@@ -245,18 +245,25 @@ const Orders = ({ url }) => {
     {
       title: "Address",
       key: "address",
-      render: (_, record) => (
-        <Tooltip
-          title={`${record.address.street}, ${record.address.city}, ${record.address.state}, ${record.address.country} - ${record.address.zipcode}`}
-        >
-          <Space>
-            <EnvironmentOutlined style={{ color: "#8c8c8c" }} />
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              {record.address.city}, {record.address.state}
-            </Text>
-          </Space>
-        </Tooltip>
-      ),
+      render: (_, record) => {
+        const addressParts = [
+          record.address.street,
+          record.address.city,
+          record.address.state,
+        ].filter(Boolean);
+        const fullAddress = addressParts.join(", ");
+
+        return (
+          <Tooltip title={fullAddress || "Address not available"}>
+            <Space>
+              <EnvironmentOutlined style={{ color: "#8c8c8c" }} />
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                {record.address.city || "N/A"}, {record.address.state || "N/A"}
+              </Text>
+            </Space>
+          </Tooltip>
+        );
+      },
       width: 150,
     },
     {

@@ -9,7 +9,7 @@ A comprehensive food delivery platform built with the MERN stack, featuring sepa
 - **Authentication**: Secure JWT-based login/signup with validation
 - **Menu Browsing**: Explore food categories with filtering options
 - **Shopping Cart**: Add/remove items with quantity management
-- **Order Placement**: Secure checkout with address validation
+- **Order Placement**: Secure checkout with address validation (Cash on Delivery)
 - **Order Tracking**: View order history and status
 - **Responsive Design**: Mobile-first approach for all devices
 
@@ -28,7 +28,7 @@ A comprehensive food delivery platform built with the MERN stack, featuring sepa
 
 - **JWT Authentication**: Secure user sessions
 - **Password Hashing**: Bcrypt encryption
-- **Stripe Integration**: Secure payment processing
+- **Cash on Delivery**: Payment collected upon delivery
 - **RESTful APIs**: Well-structured backend endpoints
 - **Role-based Access**: User and admin permissions
 - **Form Validation**: Client and server-side validation
@@ -44,7 +44,7 @@ A comprehensive food delivery platform built with the MERN stack, featuring sepa
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB with Mongoose
 - **Authentication**: JWT (JSON Web Tokens)
-- **Payment**: Stripe API
+- **Payment**: Cash on Delivery
 - **Styling**: CSS3 with responsive design
 - **State Management**: React Context API
 - **Analytics**: Custom forecasting and pricing algorithms
@@ -65,7 +65,6 @@ Food-Delivery/
 
 - Node.js (v14 or higher)
 - MongoDB (local or cloud)
-- Stripe account for payments
 
 ### Installation
 
@@ -104,7 +103,6 @@ Create a `.env` file in the `backend` directory:
 JWT_SECRET=your_jwt_secret_key
 SALT=your_bcrypt_salt_rounds
 MONGO_URL=your_mongodb_connection_string
-STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
 ### Configuration
@@ -149,6 +147,37 @@ Update the following files with your backend URL:
    cd admin
    npm run dev
    ```
+
+### Seeding Database
+
+To populate the database with initial data (users, food items, orders, pricing rules, etc.):
+
+1. **Navigate to backend directory**
+
+   ```bash
+   cd backend
+   ```
+
+2. **Run the seed script**
+   ```bash
+   node scripts/seedData.js
+   ```
+
+**Note:** The seeding script will:
+
+- **Clear all existing data** from the database (users, foods, orders, pricing rules, demand levels, weather data, and forecasts)
+- Create fresh seed data including:
+  - 8 users (covering all loyalty tiers: bronze, silver, gold, platinum, plus 1 new user and 1 admin)
+  - 7 food items (covering all categories)
+  - 40 sample orders (from the last 7 days)
+  - 8 pricing rules (for dynamic pricing algorithm)
+  - Weather data for 3 cities
+  - 24-hour forecasts for all food items
+
+**Default Login Credentials:**
+
+- **Admin**: `admin@gmail.com` / `admin123`
+- **Regular Users**: `prakash@gmail.com` / `password123` (and others)
 
 ## 🌐 Access Points
 

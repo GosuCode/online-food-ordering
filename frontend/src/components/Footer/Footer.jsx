@@ -7,7 +7,7 @@ const Footer = () => {
     <div className="footer" id="footer">
       <div className="footer-content">
         <div className="footer-content-left">
-          <img src={assets.logo} alt="" />
+          <h1 style={{ color: "#ff1e01" }}>QuickBite</h1>
           <p>
             Bringing delicious food to your doorstep with love, care, and
             commitment to quality since 2020.
@@ -38,7 +38,7 @@ const Footer = () => {
         <div className="footer-content-right">
           <h2>Get in touch</h2>
           <ul>
-            <li>+92-308-4900522</li>
+            <li>+977-9823000000</li>
             <li>contact@quickbite.com</li>
           </ul>
         </div>

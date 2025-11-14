@@ -8,6 +8,7 @@ import {
   verifyOrder,
   deleteOrder,
   submitRating,
+  getOrderById,
 } from "../controllers/orderController.js";
 
 const orderRouter = express.Router();
@@ -18,6 +19,7 @@ orderRouter.post("/status", authMiddleware, updateStatus);
 orderRouter.post("/userorders", authMiddleware, userOrders);
 orderRouter.post("/rating", authMiddleware, submitRating);
 orderRouter.get("/list", authMiddleware, listOrders);
+orderRouter.get("/:orderId", authMiddleware, getOrderById);
 orderRouter.delete("/delete/:orderId", authMiddleware, deleteOrder);
 
 export default orderRouter;

@@ -100,18 +100,54 @@ const ProductDetail = () => {
 
       fetchProductWithPricing();
     }
-  }, [userData]);
+  }, [userData, id, token, url]);
+
+  // Adjust quantity when cart items change to respect max limit
+  useEffect(() => {
+    const currentQty = cartItems?.[id] || 0;
+    const maxAllowed = 10 - currentQty;
+    setQuantity((prev) => {
+      if (prev > maxAllowed && maxAllowed > 0) {
+        return maxAllowed;
+      } else if (maxAllowed === 0 && prev > 0) {
+        return 1;
+      }
+      return prev;
+    });
+  }, [cartItems, id]);
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart(id);
+    const currentQty = cartItems?.[id] || 0;
+    const maxAllowed = 10 - currentQty;
+
+    if (currentQty >= 10) {
+      toast.error("Maximum 10 units per item allowed");
+      return;
     }
-    toast.success(`${quantity} item(s) added to cart`);
+
+    const itemsToAdd = Math.min(quantity, maxAllowed);
+
+    // Add all items at once using quantity parameter
+    addToCart(id, itemsToAdd);
+
+    if (itemsToAdd < quantity) {
+      toast.warning(
+        `Only ${itemsToAdd} item(s) added. Maximum 10 units per item allowed.`
+      );
+    } else {
+      toast.success(`${itemsToAdd} item(s) added to cart`);
+    }
   };
 
   const handleQuantityChange = (change) => {
     setQuantity((prev) => {
       const newQuantity = prev + change;
+      const currentQty = cartItems?.[id] || 0;
+      const maxAllowed = 10 - currentQty;
+      // Ensure quantity doesn't exceed what can be added
+      if (newQuantity > maxAllowed && maxAllowed > 0) {
+        return maxAllowed;
+      }
       return newQuantity >= 1 ? newQuantity : 1;
     });
   };
@@ -220,10 +256,18 @@ const ProductDetail = () => {
                 <button
                   onClick={() => handleQuantityChange(1)}
                   className="quantity-btn"
+                  disabled={
+                    (cartItems?.[id] || 0) + quantity >= 10 || quantity >= 10
+                  }
                 >
                   +
                 </button>
               </div>
+              {cartItems?.[id] && (
+                <p className="quantity-hint">
+                  {cartItems[id]} in cart (max 10 per item)
+                </p>
+              )}
             </div>
 
             <div className="product-actions">
