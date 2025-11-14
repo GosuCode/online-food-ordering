@@ -31,45 +31,87 @@ class ForecastService {
     try {
       const foods = await foodModel.find({});
       const forecasts = [];
+      let itemsWithHistory = 0;
+      let itemsSkipped = 0;
 
       for (const food of foods) {
-        const foodForecasts = this.generateMockForecasts(food._id);
-        forecasts.push(...foodForecasts);
+        const historicalData = await this.getHistoricalDemand(food._id);
+        const hasHistory = historicalData.length > 0;
+
+        if (hasHistory) {
+          const foodForecasts = this.generateForecastsFromHistory(
+            food._id,
+            historicalData
+          );
+          forecasts.push(...foodForecasts);
+          itemsWithHistory++;
+        } else {
+          itemsSkipped++;
+          console.log(
+            `⏭️  Skipping forecast generation for "${food.name}" - no order history yet`
+          );
+        }
       }
 
       if (forecasts.length > 0) {
         await Forecast.insertMany(forecasts);
-        console.log(`Generated ${forecasts.length} initial forecasts`);
+        console.log(
+          `✅ Generated ${forecasts.length} forecasts for ${itemsWithHistory} items with order history`
+        );
+        if (itemsSkipped > 0) {
+          console.log(
+            `ℹ️  Skipped ${itemsSkipped} new items without order history`
+          );
+        }
+      } else {
+        console.log(
+          "ℹ️  No forecasts generated - no items have order history yet"
+        );
       }
     } catch (error) {
       console.error("Error generating initial forecasts:", error);
     }
   }
 
-  generateMockForecasts(foodId, hours = 24) {
+  generateForecastsFromHistory(foodId, historicalData, hours = 24) {
     const forecasts = [];
-    const baseDemand = Math.random() * 8 + 3; // 3-11 base demand (more realistic)
 
-    for (let i = 0; i < hours; i++) {
-      const hour = i; // Use 0-23 for proper hourly progression
-      const isPeakHour = hour >= 18 && hour <= 21; // Dinner time
-      const isLunchHour = hour >= 12 && hour <= 14; // Lunch time
-      const isLowHour = hour >= 2 && hour <= 6; // Late night/early morning
-      const isBreakfastHour = hour >= 7 && hour <= 9; // Breakfast time
+    const hourlyAverages = {};
+    historicalData.forEach((data) => {
+      if (!hourlyAverages[data.hour]) {
+        hourlyAverages[data.hour] = [];
+      }
+      hourlyAverages[data.hour].push(data.totalQuantity);
+    });
 
-      let demand = baseDemand;
+    const allDemands = historicalData.map((d) => d.totalQuantity);
+    const baseDemand =
+      allDemands.length > 0
+        ? allDemands.reduce((a, b) => a + b, 0) / allDemands.length
+        : 3;
 
-      // Apply realistic hourly patterns
-      if (isPeakHour) demand *= 2.5; // Dinner peak
-      else if (isLunchHour) demand *= 2.0; // Lunch peak
-      else if (isBreakfastHour) demand *= 1.5; // Breakfast moderate
-      else if (isLowHour) demand *= 0.2; // Very low at night
-      else demand *= 0.8; // Regular hours
+    for (let hour = 0; hour < hours; hour++) {
+      const isPeakHour = hour >= 18 && hour <= 21;
+      const isLunchHour = hour >= 12 && hour <= 14;
+      const isLowHour = hour >= 2 && hour <= 6;
+      const isBreakfastHour = hour >= 7 && hour <= 9;
 
-      // Add some randomness (±20%)
-      demand *= 0.8 + Math.random() * 0.4;
+      let demand = hourlyAverages[hour]
+        ? hourlyAverages[hour].reduce((a, b) => a + b, 0) /
+          hourlyAverages[hour].length
+        : baseDemand;
 
-      const confidence = 0.75 + Math.random() * 0.15; // 0.75-0.9
+      if (!hourlyAverages[hour]) {
+        if (isPeakHour) demand *= 2.5;
+        else if (isLunchHour) demand *= 2.0;
+        else if (isBreakfastHour) demand *= 1.5;
+        else if (isLowHour) demand *= 0.2;
+        else demand *= 0.8;
+      }
+
+      demand *= 0.85 + Math.random() * 0.3;
+
+      const confidence = historicalData.length > 10 ? 0.8 : 0.65;
       const margin = demand * (1 - confidence) * 0.3;
 
       forecasts.push({
@@ -81,12 +123,54 @@ class ForecastService {
           upperBound: Math.round(demand + margin),
           confidence,
         },
-        weatherFactor: 0.9 + Math.random() * 0.2, // 0.9-1.1
+        weatherFactor: 0.9 + Math.random() * 0.2,
         demandLevel: demand > 15 ? "high" : demand > 8 ? "medium" : "low",
       });
     }
 
     return forecasts;
+  }
+
+  generateDefaultForecasts(foodId, hours = 24) {
+    const forecasts = [];
+    const baseDemand = 2;
+
+    for (let hour = 0; hour < hours; hour++) {
+      const isPeakHour = hour >= 18 && hour <= 21;
+      const isLunchHour = hour >= 12 && hour <= 14;
+      const isLowHour = hour >= 2 && hour <= 6;
+      const isBreakfastHour = hour >= 7 && hour <= 9;
+
+      let demand = baseDemand;
+
+      if (isPeakHour) demand *= 2.5;
+      else if (isLunchHour) demand *= 2.0;
+      else if (isBreakfastHour) demand *= 1.5;
+      else if (isLowHour) demand *= 0.2;
+      else demand *= 0.8;
+
+      const confidence = 0.5;
+      const margin = demand * (1 - confidence) * 0.5;
+
+      forecasts.push({
+        foodId,
+        forecastHour: hour,
+        predictions: {
+          pointForecast: Math.round(demand),
+          lowerBound: Math.round(Math.max(0, demand - margin)),
+          upperBound: Math.round(demand + margin),
+          confidence,
+        },
+        weatherFactor: 1.0,
+        demandLevel: "low",
+      });
+    }
+
+    return forecasts;
+  }
+
+  generateMockForecasts(foodId, hours = 24) {
+    return this.generateDefaultForecasts(foodId, hours);
   }
 
   async getForecastForFood(foodId, hours = 24) {
@@ -108,21 +192,24 @@ class ForecastService {
     try {
       const orders = await orderModel
         .find({
-          "items._id": foodId,
+          $or: [{ "items._id": foodId }, { "items.foodId": foodId }],
         })
         .sort({ createdAt: -1 })
-        .limit(100); // Get recent orders
+        .limit(100);
 
-      // Group by hour
       const hourlyData = {};
       orders.forEach((order) => {
-        const hour = new Date(order.createdAt).getHours();
-        const itemInOrder = order.items.find((item) => item._id === foodId);
+        const hour = new Date(order.createdAt || order.date).getHours();
+        const itemInOrder = order.items.find(
+          (item) =>
+            item._id?.toString() === foodId.toString() ||
+            item.foodId?.toString() === foodId.toString()
+        );
         if (itemInOrder) {
           if (!hourlyData[hour]) {
             hourlyData[hour] = 0;
           }
-          hourlyData[hour] += itemInOrder.quantity;
+          hourlyData[hour] += itemInOrder.quantity || 1;
         }
       });
 
@@ -142,7 +229,6 @@ class ForecastService {
 
       const alerts = [];
 
-      // Check for high demand alerts
       const highDemandItems = forecasts.filter(
         (f) => f.predictions.pointForecast > 20
       );
@@ -154,7 +240,6 @@ class ForecastService {
         });
       }
 
-      // Check for low confidence alerts
       const lowConfidenceItems = forecasts.filter(
         (f) => f.predictions.confidence < 0.7
       );

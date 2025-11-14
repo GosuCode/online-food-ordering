@@ -334,14 +334,9 @@ const Add = ({ url }) => {
                       borderRadius: "8px",
                     }}
                     placeholder="Enter price"
-                    prefix="Rs."
                     min={1}
                     max={10000}
                     precision={2}
-                    formatter={(value) =>
-                      `Rs. ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => value.replace(/Rs.\s?|(,*)/g, "")}
                   />
                 </Form.Item>
               </Space>

@@ -1,11 +1,10 @@
 import Forecast from "../models/forecastModel.js";
 import foodModel from "../models/foodModel.js";
 import orderModel from "../models/orderModel.js";
+import forecastService from "../services/forecastService.js";
 
-// Get forecast summary for all foods
 export const getForecastSummary = async (req, res) => {
   try {
-    // Get all foods with their forecasts
     const foods = await foodModel.find({});
     const summary = [];
 
@@ -15,16 +14,50 @@ export const getForecastSummary = async (req, res) => {
       }).sort({ forecastHour: 1 });
 
       if (forecasts.length === 0) {
-        // Generate mock data if no forecasts exist
-        summary.push({
-          foodId: food._id,
-          foodName: food.name,
-          totalDemand: 150,
-          peakHour: 19,
-          peakDemand: 25,
-          confidence: 0.85,
-          alerts: [],
-        });
+        const historicalData = await forecastService.getHistoricalDemand(
+          food._id
+        );
+        const hasHistory = historicalData.length > 0;
+
+        if (hasHistory) {
+          const tempForecasts = forecastService.generateForecastsFromHistory(
+            food._id,
+            historicalData
+          );
+          const totalDemand = tempForecasts.reduce(
+            (sum, f) => sum + f.predictions.pointForecast,
+            0
+          );
+          const peakForecast = tempForecasts.reduce((max, f) =>
+            f.predictions.pointForecast > max.predictions.pointForecast
+              ? f
+              : max
+          );
+
+          summary.push({
+            foodId: food._id,
+            foodName: food.name,
+            totalDemand: Math.round(totalDemand),
+            peakHour: peakForecast.forecastHour,
+            peakDemand: Math.round(peakForecast.predictions.pointForecast),
+            confidence: peakForecast.predictions.confidence,
+            alerts: generateAlerts(tempForecasts),
+            hasForecast: true,
+          });
+        } else {
+          summary.push({
+            foodId: food._id,
+            foodName: food.name,
+            totalDemand: 0,
+            peakHour: null,
+            peakDemand: 0,
+            confidence: 0,
+            alerts: [],
+            hasForecast: false,
+            message:
+              "No order history yet - forecasts will be available after first orders",
+          });
+        }
       } else {
         const totalDemand = forecasts.reduce(
           (sum, f) => sum + f.predictions.pointForecast,
@@ -59,7 +92,6 @@ export const getForecastSummary = async (req, res) => {
   }
 };
 
-// Get detailed forecast for a specific food
 export const getFoodForecast = async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,12 +104,27 @@ export const getFoodForecast = async (req, res) => {
       .limit(parseInt(hours));
 
     if (forecasts.length === 0) {
-      // Generate mock forecasts
-      const mockForecasts = generateMockForecasts(id, parseInt(hours));
-      return res.json({
-        success: true,
-        data: mockForecasts,
-      });
+      const historicalData = await forecastService.getHistoricalDemand(id);
+      const hasHistory = historicalData.length > 0;
+
+      if (hasHistory) {
+        const mockForecasts = forecastService.generateForecastsFromHistory(
+          id,
+          historicalData,
+          parseInt(hours)
+        );
+        return res.json({
+          success: true,
+          data: mockForecasts,
+        });
+      } else {
+        return res.json({
+          success: true,
+          data: [],
+          message:
+            "No forecasts available yet. This item needs order history to generate accurate forecasts.",
+        });
+      }
     }
 
     res.json({
@@ -93,13 +140,11 @@ export const getFoodForecast = async (req, res) => {
   }
 };
 
-// Get historical data for a food item
 export const getHistoricalData = async (req, res) => {
   try {
     const { id } = req.params;
     const { days = 7 } = req.query;
 
-    // Get historical order data
     const orders = await orderModel
       .find({
         "items._id": id,
@@ -107,7 +152,6 @@ export const getHistoricalData = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(100);
 
-    // Group by hour
     const hourlyData = {};
     orders.forEach((order) => {
       const hour = new Date(order.createdAt).getHours();
@@ -140,14 +184,12 @@ export const getHistoricalData = async (req, res) => {
   }
 };
 
-// Get forecast alerts
 export const getAlerts = async (req, res) => {
   try {
     const forecasts = await Forecast.find({});
 
     const alerts = [];
 
-    // Check for high demand alerts
     const highDemandItems = forecasts.filter(
       (f) => f.predictions.pointForecast > 20
     );
@@ -159,7 +201,6 @@ export const getAlerts = async (req, res) => {
       });
     }
 
-    // Check for low confidence alerts
     const lowConfidenceItems = forecasts.filter(
       (f) => f.predictions.confidence < 0.7
     );
@@ -184,12 +225,11 @@ export const getAlerts = async (req, res) => {
   }
 };
 
-// Get forecast configuration
 export const getConfig = async (req, res) => {
   try {
     const config = {
-      trainingWindow: 30, // days
-      forecastHorizon: 24, // hours
+      trainingWindow: 30,
+      forecastHorizon: 24,
       confidenceLevel: 0.8,
       weatherEnabled: true,
       demandThresholds: {
@@ -212,24 +252,40 @@ export const getConfig = async (req, res) => {
   }
 };
 
-// Generate forecasts for all foods
 export const generateForecasts = async (req, res) => {
   try {
     const foods = await foodModel.find({});
     const generatedForecasts = [];
 
-    // Clear existing forecasts
     await Forecast.deleteMany({});
 
+    let itemsWithHistory = 0;
+    let itemsWithoutHistory = 0;
+
     for (const food of foods) {
-      const forecasts = generateMockForecasts(food._id);
-      await Forecast.insertMany(forecasts);
-      generatedForecasts.push(...forecasts);
+      const historicalData = await forecastService.getHistoricalDemand(
+        food._id
+      );
+      const hasHistory = historicalData.length > 0;
+
+      let forecasts;
+      if (hasHistory) {
+        forecasts = forecastService.generateForecastsFromHistory(
+          food._id,
+          historicalData
+        );
+        await Forecast.insertMany(forecasts);
+        generatedForecasts.push(...forecasts);
+        itemsWithHistory++;
+      } else {
+        itemsWithoutHistory++;
+        console.log(`⏭️  Skipping "${food.name}" - no order history yet`);
+      }
     }
 
     res.json({
       success: true,
-      message: `Generated ${generatedForecasts.length} forecasts`,
+      message: `Generated ${generatedForecasts.length} forecasts for ${itemsWithHistory} items with order history. ${itemsWithoutHistory} new items skipped (no order history yet).`,
       data: generatedForecasts,
     });
   } catch (error) {
@@ -241,31 +297,28 @@ export const generateForecasts = async (req, res) => {
   }
 };
 
-// Helper function to generate mock forecasts
 const generateMockForecasts = (foodId, hours = 24) => {
   const forecasts = [];
-  const baseDemand = Math.random() * 8 + 3; // 3-11 base demand (more realistic)
+  const baseDemand = Math.random() * 8 + 3;
 
   for (let i = 0; i < hours; i++) {
-    const hour = i; // Use 0-23 for proper hourly progression
-    const isPeakHour = hour >= 18 && hour <= 21; // Dinner time
-    const isLunchHour = hour >= 12 && hour <= 14; // Lunch time
-    const isLowHour = hour >= 2 && hour <= 6; // Late night/early morning
-    const isBreakfastHour = hour >= 7 && hour <= 9; // Breakfast time
+    const hour = i;
+    const isPeakHour = hour >= 18 && hour <= 21;
+    const isLunchHour = hour >= 12 && hour <= 14;
+    const isLowHour = hour >= 2 && hour <= 6;
+    const isBreakfastHour = hour >= 7 && hour <= 9;
 
     let demand = baseDemand;
 
-    // Apply realistic hourly patterns
-    if (isPeakHour) demand *= 2.5; // Dinner peak
-    else if (isLunchHour) demand *= 2.0; // Lunch peak
-    else if (isBreakfastHour) demand *= 1.5; // Breakfast moderate
-    else if (isLowHour) demand *= 0.2; // Very low at night
-    else demand *= 0.8; // Regular hours
+    if (isPeakHour) demand *= 2.5;
+    else if (isLunchHour) demand *= 2.0;
+    else if (isBreakfastHour) demand *= 1.5;
+    else if (isLowHour) demand *= 0.2;
+    else demand *= 0.8;
 
-    // Add some randomness (±20%)
     demand *= 0.8 + Math.random() * 0.4;
 
-    const confidence = 0.75 + Math.random() * 0.15; // 0.75-0.9
+    const confidence = 0.75 + Math.random() * 0.15;
     const margin = demand * (1 - confidence) * 0.3;
 
     forecasts.push({
@@ -277,7 +330,7 @@ const generateMockForecasts = (foodId, hours = 24) => {
         upperBound: Math.round(demand + margin),
         confidence,
       },
-      weatherFactor: 0.9 + Math.random() * 0.2, // 0.9-1.1
+      weatherFactor: 0.9 + Math.random() * 0.2,
       demandLevel: demand > 15 ? "high" : demand > 8 ? "medium" : "low",
     });
   }
@@ -285,7 +338,6 @@ const generateMockForecasts = (foodId, hours = 24) => {
   return forecasts;
 };
 
-// Helper function to generate alerts
 const generateAlerts = (forecasts) => {
   const alerts = [];
   const maxDemand = Math.max(
