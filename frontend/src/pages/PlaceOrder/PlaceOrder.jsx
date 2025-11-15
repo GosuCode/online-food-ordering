@@ -28,6 +28,7 @@ const PlaceOrder = () => {
   });
   const [loading, setLoading] = useState(false);
   const hasPopulatedFromUserData = useRef(false);
+  const orderPlacedRef = useRef(false);
 
   // Nepal states/provinces
   const nepalStates = [
@@ -178,6 +179,7 @@ const PlaceOrder = () => {
         headers: { token },
       });
       if (response.data.success) {
+        orderPlacedRef.current = true; // Mark that order was placed
         setCartItems({});
         if (token) {
           await loadCardData(token);
@@ -199,14 +201,27 @@ const PlaceOrder = () => {
   };
 
   useEffect(() => {
+    // Don't check if we just placed an order (cart will be empty after order)
+    if (orderPlacedRef.current) return;
+
+    // Don't check if we're currently placing an order
+    if (loading) return;
+
     if (!token) {
       toast.error("Please Login first");
       navigate("/cart");
-    } else if (getTotalCartAmount() === 0) {
+      return;
+    }
+
+    // Check if cart is empty by checking cartItems directly
+    const hasItems =
+      cartItems && Object.keys(cartItems).some((key) => cartItems[key] > 0);
+    if (!hasItems) {
       toast.error("Please Add Items to Cart");
       navigate("/cart");
+      return;
     }
-  }, [token, getTotalCartAmount, navigate]);
+  }, [token, cartItems, navigate, loading]);
 
   useEffect(() => {
     // Only populate from userData once, when it first becomes available
