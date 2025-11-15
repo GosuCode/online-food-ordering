@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import "./PlaceOrder.css";
 import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
@@ -27,6 +27,7 @@ const PlaceOrder = () => {
     phone: "",
   });
   const [loading, setLoading] = useState(false);
+  const hasPopulatedFromUserData = useRef(false);
 
   // Nepal states/provinces
   const nepalStates = [
@@ -59,8 +60,15 @@ const PlaceOrder = () => {
   const onChangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
+    // Just update the state, no validation while typing
+    setData((data) => ({ ...data, [name]: value }));
+  };
 
-    // Apply validation based on field type
+  const onBlurHandler = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    // Validate only when user leaves the field
     if (name === "name" && value && !validateName(value)) {
       toast.error("Name should contain only letters and spaces");
       return;
@@ -80,8 +88,6 @@ const PlaceOrder = () => {
       toast.error("City should contain only letters and spaces");
       return;
     }
-
-    setData((data) => ({ ...data, [name]: value }));
   };
 
   const placeOrder = async (event) => {
@@ -203,20 +209,19 @@ const PlaceOrder = () => {
   }, [token, getTotalCartAmount, navigate]);
 
   useEffect(() => {
-    if (userData) {
-      setData((prevData) => ({
-        ...prevData,
+    // Only populate from userData once, when it first becomes available
+    if (userData && !hasPopulatedFromUserData.current) {
+      setData({
         name: userData.name || "",
         email: userData.email || "",
         city: userData.city || "",
         street: userData.street || "",
         state: userData.state || "",
         phone: userData.phone || "",
-      }));
+      });
+      hasPopulatedFromUserData.current = true;
     }
   }, [userData]);
-
-  console.log(userData);
   return (
     <form className="place-order" onSubmit={placeOrder}>
       <div className="place-order-left">
@@ -227,6 +232,7 @@ const PlaceOrder = () => {
           name="name"
           value={data.name}
           onChange={onChangeHandler}
+          onBlur={onBlurHandler}
           type="text"
           placeholder="Full Name"
           pattern="[a-zA-Z\s]+"
@@ -238,6 +244,7 @@ const PlaceOrder = () => {
           name="email"
           value={data.email}
           onChange={onChangeHandler}
+          onBlur={onBlurHandler}
           type="email"
           placeholder="Gmail Address (e.g., user@gmail.com)"
           title="Please enter a valid Gmail address"
@@ -258,6 +265,7 @@ const PlaceOrder = () => {
             name="city"
             value={data.city}
             onChange={onChangeHandler}
+            onBlur={onBlurHandler}
             type="text"
             placeholder="City"
             pattern="[a-zA-Z\s]+"
@@ -284,6 +292,7 @@ const PlaceOrder = () => {
           name="phone"
           value={data.phone}
           onChange={onChangeHandler}
+          onBlur={onBlurHandler}
           type="tel"
           placeholder="Phone Number (10 digits)"
           pattern="[0-9]{10}"
