@@ -8,7 +8,8 @@ import PropTypes from "prop-types";
 
 const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("home");
-  const { getTotalCartAmount, token, setToken } = useContext(StoreContext);
+  const { getTotalCartAmount, token, setToken, userData } =
+    useContext(StoreContext);
   const navigate = useNavigate();
 
   const logout = () => {
@@ -20,7 +21,7 @@ const Navbar = ({ setShowLogin }) => {
   return (
     <div className="navbar">
       <Link to="/">
-        <h1 style={{ color: "#ff1e01" }}>QuickBite</h1>
+        <h1 style={{ color: "#ff1e01" }}>QuickBite Restaurant</h1>
       </Link>
       <ul className="navbar-menu">
         <Link
@@ -71,7 +72,12 @@ const Navbar = ({ setShowLogin }) => {
         {!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>
         ) : (
-          <button onClick={() => logout()}>sign Out</button>
+          <>
+            {userData && userData.name && (
+              <span className="navbar-username">Hi, {userData.name}</span>
+            )}
+            <button onClick={() => logout()}>sign Out</button>
+          </>
         )}
       </div>
     </div>

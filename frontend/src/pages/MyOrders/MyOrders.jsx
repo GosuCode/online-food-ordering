@@ -27,6 +27,7 @@ const MyOrders = () => {
     if (token) {
       fetchOrders();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const submitRating = async (orderId) => {
@@ -57,12 +58,17 @@ const MyOrders = () => {
   };
 
   const openRatingModal = (order) => {
+    // Only allow rating if order is delivered
+    if (order.status !== "Delivered") {
+      toast.error("You can only rate orders that have been delivered");
+      return;
+    }
     setRatingOrder(order);
     setRating(order.rating || 5);
     setReview(order.review || "");
   };
   return (
-    <div className="my-orders">
+    <div className="my-orders" style={{ minHeight: "60vh" }}>
       <h2>Orders</h2>
       <div className="container">
         {data.length === 0 ? (
@@ -103,15 +109,19 @@ const MyOrders = () => {
                   <span>Rating: {order.rating}/5</span>
                   {order.review && <p>Review: {order.review}</p>}
                 </div>
-              ) : (
+              ) : order.status === "Delivered" ? (
                 <button
                   onClick={() => openRatingModal(order)}
                   className="rate-order-btn"
                 >
                   Rate Order
                 </button>
+              ) : (
+                <p className="rating-disabled">
+                  Rating available after delivery
+                </p>
               )}
-              <button onClick={fetchOrders}>Track Order</button>
+              {/* <button onClick={fetchOrders}>Track Order</button> */}
             </div>
           ))
         )}

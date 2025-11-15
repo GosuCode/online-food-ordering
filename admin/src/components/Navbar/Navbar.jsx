@@ -40,21 +40,21 @@ const Navbar = () => {
   const userMenu = (
     <Menu
       items={[
-        {
-          key: "profile",
-          icon: <UserOutlined />,
-          label: "Profile",
-          onClick: () => console.log("Profile clicked"),
-        },
-        {
-          key: "settings",
-          icon: <SettingOutlined />,
-          label: "Settings",
-          onClick: () => console.log("Settings clicked"),
-        },
-        {
-          type: "divider",
-        },
+        // {
+        //   key: "profile",
+        //   icon: <UserOutlined />,
+        //   label: "Profile",
+        //   onClick: () => console.log("Profile clicked"),
+        // },
+        // {
+        //   key: "settings",
+        //   icon: <SettingOutlined />,
+        //   label: "Settings",
+        //   onClick: () => console.log("Settings clicked"),
+        // },
+        // {
+        //   type: "divider",
+        // },
         {
           key: "logout",
           icon: <LogoutOutlined />,
