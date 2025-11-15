@@ -8,8 +8,16 @@ import { useNavigate } from "react-router-dom";
 const PlaceOrder = () => {
   const navigate = useNavigate();
 
-  const { getTotalCartAmount, token, food_list, cartItems, url, userData } =
-    useContext(StoreContext);
+  const {
+    getTotalCartAmount,
+    token,
+    food_list,
+    cartItems,
+    url,
+    userData,
+    setCartItems,
+    loadCardData,
+  } = useContext(StoreContext);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -18,6 +26,7 @@ const PlaceOrder = () => {
     state: "",
     phone: "",
   });
+  const [loading, setLoading] = useState(false);
 
   // Nepal states/provinces
   const nepalStates = [
@@ -78,45 +87,66 @@ const PlaceOrder = () => {
   const placeOrder = async (event) => {
     event.preventDefault();
 
-    // Validate all fields before submission
+    if (loading) return;
+
+    if (getTotalCartAmount() === 0) {
+      toast.error("Your cart is empty!");
+      navigate("/cart");
+      return;
+    }
+
+    setLoading(true);
     if (!validateName(data.name)) {
       toast.error("Name should contain only letters and spaces");
+      setLoading(false);
       return;
     }
 
     if (!validateEmail(data.email)) {
       toast.error("Please enter a valid Gmail address");
+      setLoading(false);
       return;
     }
 
     if (!validatePhone(data.phone)) {
       toast.error("Phone number must contain exactly 10 digits");
+      setLoading(false);
       return;
     }
 
     if (!validateCity(data.city)) {
       toast.error("City should contain only letters and spaces");
+      setLoading(false);
       return;
     }
 
     if (!data.state) {
       toast.error("Please select a state");
+      setLoading(false);
       return;
     }
 
     if (!data.street.trim()) {
       toast.error("Please enter street address");
+      setLoading(false);
       return;
     }
 
     let orderItems = [];
-    food_list.map((item) => {
+    food_list.forEach((item) => {
       if (cartItems && cartItems[item._id] > 0) {
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
+        let itemInfo = { ...item };
+        itemInfo.quantity = cartItems[item._id];
         orderItems.push(itemInfo);
       }
     });
+
+    if (orderItems.length === 0) {
+      toast.error("Your cart is empty!");
+      setLoading(false);
+      navigate("/cart");
+      return;
+    }
 
     // Only send the specified data fields
     const addressData = {
@@ -128,20 +158,37 @@ const PlaceOrder = () => {
       phone: data.phone,
     };
 
+    const deliveryFee = getTotalCartAmount() === 0 ? 0 : 10;
+    const totalAmount = getTotalCartAmount() + deliveryFee;
+
     let orderData = {
       address: addressData,
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
+      amount: totalAmount,
     };
 
-    let response = await axios.post(url + "/api/order/place", orderData, {
-      headers: { token },
-    });
-    if (response.data.success) {
-      const { orderId } = response.data;
-      navigate(`/order-confirmation?orderId=${orderId}`);
-    } else {
-      toast.error("Error placing order!");
+    try {
+      let response = await axios.post(url + "/api/order/place", orderData, {
+        headers: { token },
+      });
+      if (response.data.success) {
+        setCartItems({});
+        if (token) {
+          await loadCardData(token);
+        }
+        const { orderId } = response.data;
+        navigate(`/order-confirmation?orderId=${orderId}`);
+      } else {
+        toast.error(response.data.message || "Error placing order!");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Error placing order. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -265,7 +312,9 @@ const PlaceOrder = () => {
               </b>
             </div>
           </div>
-          <button type="submit">PLACE ORDER</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "PLACING ORDER..." : "PLACE ORDER"}
+          </button>
         </div>
       </div>
     </form>

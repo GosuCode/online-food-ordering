@@ -1,32 +1,16 @@
 import { useState, useEffect } from "react";
 import "./Forecast.css";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
 
 const Forecast = () => {
   const [forecastSummary, setForecastSummary] = useState([]);
   const [selectedFood, setSelectedFood] = useState(null);
   const [foodForecast, setFoodForecast] = useState([]);
-  const [historicalData, setHistoricalData] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [config, setConfig] = useState(null);
-  const [showConfig, setShowConfig] = useState(false);
 
   useEffect(() => {
     fetchForecastData();
     fetchAlerts();
-    fetchConfig();
   }, []);
 
   const fetchForecastData = async () => {
@@ -67,24 +51,6 @@ const Forecast = () => {
     }
   };
 
-  const fetchHistoricalData = async (foodId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:4000/api/forecast/historical/${foodId}?days=7`,
-        {
-          headers: { token },
-        }
-      );
-      const data = await response.json();
-      if (data.success) {
-        setHistoricalData(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching historical data:", error);
-    }
-  };
-
   const fetchAlerts = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -103,96 +69,9 @@ const Forecast = () => {
     }
   };
 
-  const fetchConfig = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:4000/api/forecast/config",
-        {
-          headers: { token },
-        }
-      );
-      const data = await response.json();
-      if (data.success) {
-        setConfig(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching config:", error);
-    }
-  };
-
-  // const generateForecasts = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const token = localStorage.getItem("token");
-  //     const response = await fetch(
-  //       "http://localhost:4000/api/forecast/generate",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           token,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       alert(`Generated forecasts for ${data.data.length} food items`);
-  //       fetchForecastData();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error generating forecasts:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleFoodSelect = (food) => {
     setSelectedFood(food);
     fetchFoodForecast(food.foodId);
-    fetchHistoricalData(food.foodId);
-  };
-
-  const formatChartData = (forecastData, historicalData) => {
-    const chartData = [];
-
-    // Add historical data
-    historicalData.forEach((item) => {
-      const hour = item.hour;
-      const existing = chartData.find((d) => d.hour === hour);
-      if (existing) {
-        existing.historical += item.totalQuantity;
-      } else {
-        chartData.push({
-          hour: hour,
-          historical: item.totalQuantity,
-          forecast: 0,
-          lowerBound: 0,
-          upperBound: 0,
-        });
-      }
-    });
-
-    // Add forecast data
-    forecastData.forEach((item) => {
-      const hour = item.forecastHour;
-      const existing = chartData.find((d) => d.hour === hour);
-      if (existing) {
-        existing.forecast = item.predictions.pointForecast;
-        existing.lowerBound = item.predictions.lowerBound;
-        existing.upperBound = item.predictions.upperBound;
-      } else {
-        chartData.push({
-          hour: hour,
-          historical: 0,
-          forecast: item.predictions.pointForecast,
-          lowerBound: item.predictions.lowerBound,
-          upperBound: item.predictions.upperBound,
-        });
-      }
-    });
-
-    return chartData.sort((a, b) => a.hour - b.hour);
   };
 
   if (loading) {
@@ -208,21 +87,6 @@ const Forecast = () => {
     <div className="forecast-container">
       <div className="forecast-header">
         <h1>📊 Demand Forecasting</h1>
-        <div className="forecast-actions">
-          {/* <button
-            className="generate-btn"
-            onClick={generateForecasts}
-            disabled={loading}
-          >
-            {loading ? "Generating..." : "🔄 Generate Forecasts"}
-          </button> */}
-          {/* <button
-            className="config-btn"
-            onClick={() => setShowConfig(!showConfig)}
-          >
-            ⚙️ Configuration
-          </button> */}
-        </div>
       </div>
 
       {/* Alerts Section */}
@@ -242,31 +106,6 @@ const Forecast = () => {
           </div>
         </div>
       )}
-
-      {/* Configuration Panel */}
-      {/* {showConfig && config && (
-        <div className="config-panel">
-          <h3>⚙️ Forecast Configuration</h3>
-          <div className="config-grid">
-            <div className="config-item">
-              <label>Training Window (days):</label>
-              <input type="number" value={config.trainingWindow} readOnly />
-            </div>
-            <div className="config-item">
-              <label>Forecast Horizon (hours):</label>
-              <input type="number" value={config.forecastHorizon} readOnly />
-            </div>
-            <div className="config-item">
-              <label>Confidence Level:</label>
-              <input type="number" value={config.confidenceLevel} readOnly />
-            </div>
-            <div className="config-item">
-              <label>Weather Integration:</label>
-              <input type="checkbox" checked={config.weatherEnabled} readOnly />
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {/* Forecast Summary */}
       <div className="forecast-summary">
@@ -313,106 +152,19 @@ const Forecast = () => {
         </div>
       </div>
 
-      {/* Detailed Forecast Chart */}
-      {selectedFood && (
-        <div className="detailed-forecast">
-          <h2>📊 Detailed Forecast: {selectedFood.foodName}</h2>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={formatChartData(foodForecast, historicalData)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="hour"
-                  label={{
-                    value: "Hour",
-                    position: "insideBottom",
-                    offset: -10,
-                  }}
-                />
-                <YAxis
-                  label={{
-                    value: "Demand",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
-                />
-                <Tooltip
-                  formatter={(value, name) => [
-                    value,
-                    name === "historical"
-                      ? "Historical"
-                      : name === "forecast"
-                      ? "Forecast"
-                      : name === "lowerBound"
-                      ? "Lower Bound"
-                      : "Upper Bound",
-                  ]}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="historical"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  name="Historical"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="forecast"
-                  stroke="#82ca9d"
-                  strokeWidth={2}
-                  name="Forecast"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="lowerBound"
-                  stroke="#ffc658"
-                  strokeDasharray="5 5"
-                  name="Lower Bound"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="upperBound"
-                  stroke="#ffc658"
-                  strokeDasharray="5 5"
-                  name="Upper Bound"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Hourly Forecast Table */}
       {selectedFood && foodForecast.length > 0 && (
         <div className="forecast-table">
-          <h3>🕐 Hourly Forecast Details</h3>
+          <h3>🕐 Hourly Forecast Details for {selectedFood.foodName}</h3>
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>
-                    Hour <span className="header-tip">(Time of day)</span>
-                  </th>
-                  <th>
-                    Forecast{" "}
-                    <span className="header-tip">(Expected demand)</span>
-                  </th>
-                  <th>
-                    Lower Bound{" "}
-                    <span className="header-tip">(Min expected)</span>
-                  </th>
-                  <th>
-                    Upper Bound{" "}
-                    <span className="header-tip">(Max expected)</span>
-                  </th>
-                  <th>
-                    Confidence <span className="header-tip">(How sure %)</span>
-                  </th>
-                  <th>
-                    Weather Factor{" "}
-                    <span className="header-tip">(Weather impact)</span>
-                  </th>
+                  <th>Hour</th>
+                  <th>Forecast</th>
+                  <th>Lower Bound</th>
+                  <th>Upper Bound</th>
+                  <th>Confidence</th>
+                  <th>Weather Factor</th>
                 </tr>
               </thead>
               <tbody>
@@ -432,7 +184,7 @@ const Forecast = () => {
                       {(item.predictions.confidence * 100).toFixed(1)}%
                     </td>
                     <td className="weather-factor">
-                      {item.weatherFactor.toFixed(2)}x
+                      {item.weatherFactor?.toFixed(2) || "1.00"}x
                     </td>
                   </tr>
                 ))}

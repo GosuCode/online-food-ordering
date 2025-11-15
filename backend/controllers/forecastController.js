@@ -97,39 +97,39 @@ export const getFoodForecast = async (req, res) => {
     const { id } = req.params;
     const { hours = 24 } = req.query;
 
-    const forecasts = await Forecast.find({
+    const historicalData = await forecastService.getHistoricalDemand(id);
+    const hasHistory = historicalData.length > 0;
+
+    if (hasHistory) {
+      const forecasts = forecastService.generateForecastsFromHistory(
+        id,
+        historicalData,
+        parseInt(hours)
+      );
+      return res.json({
+        success: true,
+        data: forecasts,
+      });
+    }
+
+    const storedForecasts = await Forecast.find({
       foodId: id,
     })
       .sort({ forecastHour: 1 })
       .limit(parseInt(hours));
 
-    if (forecasts.length === 0) {
-      const historicalData = await forecastService.getHistoricalDemand(id);
-      const hasHistory = historicalData.length > 0;
-
-      if (hasHistory) {
-        const mockForecasts = forecastService.generateForecastsFromHistory(
-          id,
-          historicalData,
-          parseInt(hours)
-        );
-        return res.json({
-          success: true,
-          data: mockForecasts,
-        });
-      } else {
-        return res.json({
-          success: true,
-          data: [],
-          message:
-            "No forecasts available yet. This item needs order history to generate accurate forecasts.",
-        });
-      }
+    if (storedForecasts.length > 0) {
+      return res.json({
+        success: true,
+        data: storedForecasts,
+      });
     }
 
-    res.json({
+    return res.json({
       success: true,
-      data: forecasts,
+      data: [],
+      message:
+        "No forecasts available yet. This item needs order history to generate accurate forecasts.",
     });
   } catch (error) {
     console.error("Error fetching food forecast:", error);

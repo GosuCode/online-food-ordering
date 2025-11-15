@@ -199,6 +199,7 @@ const StoreContextProvider = (props) => {
     token,
     setToken,
     userData,
+    loadCardData,
   };
   return (
     <StoreContext.Provider value={contextValue}>
